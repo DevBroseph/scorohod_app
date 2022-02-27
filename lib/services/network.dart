@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/error.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/product.dart';
@@ -58,6 +59,15 @@ class NetHandler {
     }
 
     return null;
+  }
+
+  Future<List<Category>?> getCategories() async {
+    var data = await _request(
+      url: "categories",
+      method: Method.get,
+    );
+
+    return data != null ? categoriesFromJson(data) : null;
   }
 
   Future<List<Shop>?> getShops() async {

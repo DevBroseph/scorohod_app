@@ -1,10 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
+import 'package:scorohod_app/widgets/category.dart';
+import 'package:scorohod_app/widgets/order_widget.dart';
+import 'package:scorohod_app/widgets/product_card.dart';
+import 'package:scorohod_app/widgets/rect_getter.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+
+import 'home.dart';
 
 class GroupPage extends StatefulWidget {
   const GroupPage({
@@ -24,172 +32,241 @@ class GroupPage extends StatefulWidget {
   _GroupPageState createState() => _GroupPageState();
 }
 
-class _GroupPageState extends State<GroupPage> {
+class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
   final List<Group> _perrentGroups = [];
   final List<Product> _perrentProducts = [];
 
+  final _searchController = TextEditingController();
   final List<Widget> _list = [];
+  TabController? _tabController;
+
+  AutoScrollController scrollController = AutoScrollController();
+  bool pauseRectGetterIndex = false;
+  final listViewKey = RectGetter.createGlobalKey();
+  Map<int, dynamic> itemsKeys = {};
+
+  int selectedMenu = 0;
 
   @override
   void initState() {
-    for (var item in widget.groups) {
-      if (item.parentId == widget.perrent.id) {
-        _perrentGroups.add(item);
+    for (var itemGroup in widget.groups) {
+      if (itemGroup.parentId == widget.perrent.id) {
+        for (var item in widget.products) {
+          if (item.groupId == itemGroup.id) {
+            _perrentProducts.add(item);
+          }
+        }
+        _perrentGroups.add(itemGroup);
       }
     }
-    for (var item in widget.products) {
-      if (item.groupId == widget.perrent.id) {
-        _perrentProducts.add(item);
+    setState(() {
+      _tabController = TabController(
+        length: _perrentGroups.length,
+        vsync: this,
+      );
+    });
+
+    _tabController!.addListener(() {
+      if (VerticalScrollableTabBarStatus.isOnTap) {
+        animateAndScrollTo(VerticalScrollableTabBarStatus.isOnTapIndex);
+        VerticalScrollableTabBarStatus.isOnTap = false;
       }
-    }
+    });
     super.initState();
+  }
+
+  void animateAndScrollTo(int index) async {
+    pauseRectGetterIndex = true;
+    _tabController!.animateTo(index);
+    await scrollController.scrollToIndex(
+      index,
+      preferPosition: AutoScrollPosition.begin,
+    );
+    // setState(() {
+    selectedMenu = index;
+    // });
+    pauseRectGetterIndex = false;
+  }
+
+  bool onScrollNotification(ScrollNotification notification) {
+    if (pauseRectGetterIndex) return true;
+
+    int lastTabIndex = _tabController!.length;
+    List<int> visibleItems = getVisibleItemsIndex();
+
+    bool reachLastTabIndex = visibleItems.isNotEmpty &&
+        visibleItems.length <= 2 &&
+        visibleItems.last == lastTabIndex;
+
+    if (reachLastTabIndex) {
+      _tabController!.animateTo(lastTabIndex);
+    } else {
+      int sumIndex = visibleItems.reduce(
+        (value, element) => value + element + 1,
+      );
+      int middleIndex = sumIndex ~/ visibleItems.length;
+
+      if (_tabController!.index != middleIndex) {
+        _tabController!.animateTo(middleIndex);
+      }
+    }
+    return false;
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  List<int> getVisibleItemsIndex() {
+    Rect? rect = RectGetter.getRectFromKey(listViewKey);
+    List<int> items = [];
+    if (rect == null) return items;
+
+    itemsKeys.forEach((index, key) {
+      Rect? itemRect = RectGetter.getRectFromKey(key);
+      if (itemRect == null) return;
+      if (itemRect.top > rect.bottom) return;
+      if (itemRect.bottom < rect.top) return;
+
+      items.add(index);
+    });
+
+    return items;
+  }
+
+  Widget buildItem(int index, double width) {
+    return RectGetter(
+      key: itemsKeys[index],
+      child: AutoScrollTag(
+        key: ValueKey(index),
+        index: index,
+        controller: scrollController,
+        child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8.0,
+            ),
+            child: CategoryWidget(
+                category: _perrentGroups[index],
+                index: index,
+                products: _perrentProducts,
+                color: widget.color,
+                width: width)),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
-    _list.clear();
-    for (var item in _perrentProducts) {
-      _list.add(
-        Container(
-          width: width,
-          height: width + 30,
-          margin: const EdgeInsets.only(left: 15),
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            boxShadow: shadow,
-            color: Colors.white,
-          ),
-          child: Column(
-            children: [
-              Image.memory(
-                base64Decode(item.image),
-                width: width / 2,
-                height: width / 2,
-              ),
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+    // _list.clear();
+    // for (var item in _perrentProducts) {
+    //   _list.add(
+    //     ProductCard(width: width, item: item, color: widget.color),
+    //   );
+    // }
+    return Scaffold(
+      body: Stack(
+        children: [
+          RectGetter(
+            key: listViewKey,
+            child: NotificationListener<ScrollNotification>(
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    elevation: 0,
+                    expandedHeight: 80,
+                    foregroundColor: widget.color,
+                    title: Text(
+                      widget.perrent.name,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: widget.color,
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      Text(
-                        item.measure,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Expanded(child: Container()),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "100 ₽",
-                            style: TextStyle(
-                              fontSize: 18,
-                            ),
-                          ),
-                          Container(
-                            width: 30,
-                            height: 30,
-                            child: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.color,
-                              borderRadius: radius,
-                            ),
-                          ),
-                        ],
-                      ),
+                    ),
+                    snap: false,
+                    actions: [
+                      IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.search,
+                            color: widget.color,
+                          ))
                     ],
                   ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            foregroundColor: widget.color,
-            title: Text(
-              widget.perrent.name,
-              style: TextStyle(
-                color: widget.color,
-              ),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                var group = _perrentGroups[index];
-
-                return ListTile(
-                  onTap: () => context.nextPage(
-                    GroupPage(
-                      perrent: group,
-                      groups: widget.groups,
-                      products: widget.products,
-                      color: widget.color,
+                  if (_tabController != null)
+                    SliverAppBar(
+                      automaticallyImplyLeading: false,
+                      pinned: true,
+                      backgroundColor:
+                          Theme.of(context).appBarTheme.backgroundColor,
+                      shadowColor: Colors.black.withOpacity(0.3),
+                      toolbarHeight: Platform.isIOS ? 5 : 30,
+                      flexibleSpace: TabBar(
+                        isScrollable: true,
+                        controller: _tabController,
+                        overlayColor: MaterialStateProperty.all(
+                          Colors.transparent,
+                        ),
+                        indicatorPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                        labelColor: Colors.white,
+                        unselectedLabelColor: Colors.grey[700],
+                        indicator: BoxDecoration(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(32),
+                            ),
+                            color: widget.color),
+                        tabs: _perrentGroups.map((e) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 25,
+                              vertical: 10,
+                            ),
+                            child: Text(
+                              e.name,
+                            ),
+                          );
+                        }).toList(),
+                        onTap: (index) {
+                          VerticalScrollableTabBarStatus.setIndex(index);
+                        },
+                      ),
+                    ),
+                  // const SliverToBoxAdapter(
+                  //   child: SizedBox(height: 15),
+                  // ),
+                  // SliverFillRemaining(
+                  //   hasScrollBody: false,
+                  //   child: Wrap(
+                  //     runSpacing: 15,
+                  //     children: _list,
+                  //   ),
+                  // ),
+                  if (_tabController != null)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        itemsKeys[index] = RectGetter.createGlobalKey();
+                        return buildItem(index, width);
+                      }, childCount: _perrentGroups.length),
+                    ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: MediaQuery.of(context).padding.bottom * 7,
                     ),
                   ),
-                  title: Text(group.name),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 20,
-                  ),
-                  leading: group.groupImage.isNotEmpty
-                      ? Image.memory(
-                          base64Decode(group.groupImage),
-                          width: 40,
-                          height: 40,
-                        )
-                      : Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: widget.color.withOpacity(0.1),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(20),
-                            ),
-                          ),
-                        ),
-                );
-              },
-              childCount: _perrentGroups.length,
+                ],
+              ),
+              onNotification: onScrollNotification,
             ),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 15),
-          ),
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Wrap(
-              runSpacing: 15,
-              children: _list,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: MediaQuery.of(context).padding.bottom,
-            ),
+          Align(
+            child: OrderWidget(price: 12, color: widget.color),
+            alignment: Alignment.bottomCenter,
           ),
         ],
       ),
