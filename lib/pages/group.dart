@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/product.dart';
+import 'package:scorohod_app/pages/search_products.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/widgets/category.dart';
@@ -36,8 +37,6 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
   final List<Group> _perrentGroups = [];
   final List<Product> _perrentProducts = [];
 
-  final _searchController = TextEditingController();
-  final List<Widget> _list = [];
   TabController? _tabController;
 
   AutoScrollController scrollController = AutoScrollController();
@@ -46,6 +45,7 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
   Map<int, dynamic> itemsKeys = {};
 
   int selectedMenu = 0;
+  bool _search = false;
 
   @override
   void initState() {
@@ -82,9 +82,7 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
       index,
       preferPosition: AutoScrollPosition.begin,
     );
-    // setState(() {
     selectedMenu = index;
-    // });
     pauseRectGetterIndex = false;
   }
 
@@ -160,12 +158,7 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
-    // _list.clear();
-    // for (var item in _perrentProducts) {
-    //   _list.add(
-    //     ProductCard(width: width, item: item, color: widget.color),
-    //   );
-    // }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -183,14 +176,18 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                     title: Text(
                       widget.perrent.name,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         color: widget.color,
                       ),
                     ),
                     snap: false,
                     actions: [
                       IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            setState(() {
+                              _search = true;
+                            });
+                          },
                           icon: Icon(
                             Icons.search,
                             color: widget.color,
@@ -217,10 +214,11 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                         labelColor: Colors.white,
                         unselectedLabelColor: Colors.grey[700],
                         indicator: BoxDecoration(
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(32),
-                            ),
-                            color: widget.color),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(32),
+                          ),
+                          color: widget.color,
+                        ),
                         tabs: _perrentGroups.map((e) {
                           return Container(
                             padding: const EdgeInsets.symmetric(
@@ -237,22 +235,15 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                         },
                       ),
                     ),
-                  // const SliverToBoxAdapter(
-                  //   child: SizedBox(height: 15),
-                  // ),
-                  // SliverFillRemaining(
-                  //   hasScrollBody: false,
-                  //   child: Wrap(
-                  //     runSpacing: 15,
-                  //     children: _list,
-                  //   ),
-                  // ),
                   if (_tabController != null)
                     SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        itemsKeys[index] = RectGetter.createGlobalKey();
-                        return buildItem(index, width);
-                      }, childCount: _perrentGroups.length),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          itemsKeys[index] = RectGetter.createGlobalKey();
+                          return buildItem(index, width);
+                        },
+                        childCount: _perrentGroups.length,
+                      ),
                     ),
                   SliverToBoxAdapter(
                     child: SizedBox(
@@ -268,6 +259,17 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
             child: OrderWidget(price: 12, color: widget.color),
             alignment: Alignment.bottomCenter,
           ),
+          if (_search)
+            SearchProductsPage(
+              close: () {
+                setState(() {
+                  _search = false;
+                });
+              },
+              products: _perrentProducts,
+              groups: _perrentGroups,
+              color: widget.color,
+            ),
         ],
       ),
     );

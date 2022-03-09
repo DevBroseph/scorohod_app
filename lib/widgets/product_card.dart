@@ -44,7 +44,7 @@ class _ProductCardState extends State<ProductCard> {
         },
         child: Container(
           width: (MediaQuery.of(context).size.width - 48) / 2,
-          height: widget.width + 40,
+          height: widget.width + 50,
           decoration: BoxDecoration(
             borderRadius: radius,
             boxShadow: shadow,
@@ -52,10 +52,13 @@ class _ProductCardState extends State<ProductCard> {
           ),
           child: Column(
             children: [
-              Image.memory(
-                base64Decode(widget.item.image),
-                width: widget.width / 2,
-                height: widget.width / 2,
+              Padding(
+                padding: const EdgeInsets.only(top: 15),
+                child: Image.memory(
+                  base64Decode(widget.item.image),
+                  width: widget.width / 2,
+                  height: widget.width / 2,
+                ),
               ),
               Expanded(
                 child: Container(
@@ -65,7 +68,9 @@ class _ProductCardState extends State<ProductCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.item.name,
+                        widget.item.name.length < 25
+                            ? widget.item.name
+                            : widget.item.name.substring(0, 20) + '...',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -80,30 +85,20 @@ class _ProductCardState extends State<ProductCard> {
                         ),
                       ),
                       Expanded(child: Container()),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "100 ₽",
-                            style: TextStyle(
-                              fontSize: 18,
-                            ),
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[100]),
+                        height: 35,
+                        child: Center(
+                          child: Text(
+                            widget.item.price.toInt().toString() + ' ₽',
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black),
                           ),
-                          Container(
-                            width: 30,
-                            height: 30,
-                            child: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.color,
-                              borderRadius: radius,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      )
                     ],
                   ),
                 ),

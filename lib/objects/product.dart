@@ -17,6 +17,7 @@ class Product {
     required this.measure,
     required this.manufacturer,
     required this.terms,
+    required this.price,
   });
 
   String nomenclatureId;
@@ -29,6 +30,7 @@ class Product {
   String measure;
   String manufacturer;
   String terms;
+  double price;
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         nomenclatureId: json["nomenclature_id"],
@@ -41,5 +43,8 @@ class Product {
         measure: json["measure"],
         manufacturer: json["manufacturer"],
         terms: json["terms"],
+        price: (int.tryParse(json['price'].toString()) ??
+                double.parse(json['price'].toString()))
+            .toDouble(),
       );
 }

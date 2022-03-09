@@ -47,6 +47,7 @@ class _State extends State<OrderWidget> {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
+                        fullscreenDialog: true,
                         builder: (context) => BasketPage(
                           color: widget.color,
                         ),

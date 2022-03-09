@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:scorohod_app/main.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/shop.dart';
@@ -79,90 +80,45 @@ class _HomePageState extends State<HomePage>
           children: [
             CustomScrollView(
               slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  // automaticallyImplyLeading: false,
-                  elevation: 0,
-                  title: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _search = true;
-                      });
-                    },
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        _address,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 16,
+                if (_categories.isNotEmpty)
+                  SliverAppBar(
+                    pinned: true,
+                    elevation: 0,
+                    title: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _search = true;
+                        });
+                      },
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          _address,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 15),
                 ),
-                if (tabController != null)
-                  SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    pinned: true,
-                    backgroundColor:
-                        Theme.of(context).appBarTheme.backgroundColor,
-                    shadowColor: Colors.black.withOpacity(0.3),
-                    toolbarHeight: Platform.isIOS ? 5 : 30,
-                    flexibleSpace: TabBar(
-                      isScrollable: true,
-                      controller: tabController,
-                      overlayColor: MaterialStateProperty.all(
-                        Colors.transparent,
-                      ),
-                      indicatorPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.grey[700],
-                      indicator: const BoxDecoration(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(32),
-                          ),
-                          color: Colors.red),
-                      tabs: _categories.map((e) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 25,
-                            vertical: 10,
-                          ),
-                          child: Text(
-                            e.categoryName,
-                          ),
-                        );
-                      }).toList(),
-                      onTap: (index) {
-                        VerticalScrollableTabBarStatus.setIndex(index);
-                      },
-                    ),
-                  ),
-                // const SliverToBoxAdapter(
-                //   child: SizedBox(height: 15),
-                // ),
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Text(
-                      "Продукты",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                if (_categories.isNotEmpty)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Text(
+                        "Продукты",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                // const SliverToBoxAdapter(
-                //   child: SizedBox(height: 15),
-                // ),
                 SliverFillRemaining(
                   child: Wrap(
                     runSpacing: 15,
@@ -185,6 +141,17 @@ class _HomePageState extends State<HomePage>
                     _address = address;
                   });
                 },
+              ),
+            if (_categories.isEmpty)
+              SizedBox(
+                height: MediaQuery.of(context).size.height,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: LoadingAnimationWidget.inkDrop(
+                    color: Theme.of(context).primaryColor,
+                    size: 50,
+                  ),
+                ),
               ),
           ],
         ),

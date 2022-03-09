@@ -55,84 +55,93 @@ class _ShopCellState extends State<ShopCell> {
 
   @override
   Widget build(BuildContext context) {
-    return ScaleButton(
-      duration: const Duration(milliseconds: 150),
-      bound: 0.05,
-      onTap: widget.onTap,
-      child: Container(
-        width: widget.width,
-        height: widget.width,
-        margin: const EdgeInsets.only(left: 15),
-        decoration: BoxDecoration(
-          borderRadius: radius,
-          boxShadow: shadow,
-          color: _color.withOpacity(0.2),
-        ),
-        child: Stack(
-          children: [
-            // ClipRRect(
-            //   borderRadius: radius,
-            //   child: Image.memory(
-            //     base64Decode(widget.shop.shopLogo),
-            //   ),
-            // ),
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(
-                color: _color,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                  bottomLeft: Radius.circular(15),
-                  bottomRight: Radius.circular(150),
+    return AnimatedSwitcher(
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return ScaleTransition(
+          child: child,
+          scale: animation,
+        );
+      },
+      duration: const Duration(milliseconds: 300),
+      child: ScaleButton(
+        duration: const Duration(milliseconds: 150),
+        bound: 0.05,
+        onTap: widget.onTap,
+        child: Container(
+          width: widget.width,
+          height: widget.width,
+          margin: const EdgeInsets.only(left: 15),
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            boxShadow: shadow,
+            color: _color.withOpacity(0.2),
+          ),
+          child: Stack(
+            children: [
+              // ClipRRect(
+              //   borderRadius: radius,
+              //   child: Image.memory(
+              //     base64Decode(widget.shop.shopLogo),
+              //   ),
+              // ),
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: _color,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(150),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FittedBox(
-                    child: Text(
-                      widget.shop.shopName,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+              Padding(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      child: Text(
+                        widget.shop.shopName,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  FittedBox(
-                    child: Text(
-                      widget.shop.shopWorkingHours,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    FittedBox(
+                      child: Text(
+                        widget.shop.shopWorkingHours,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  FittedBox(
-                    child: Text(
-                      "от ${widget.shop.shopMinSum} ₽",
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    FittedBox(
+                      child: Text(
+                        "от ${widget.shop.shopMinSum} ₽",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/product.dart';
-import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/widgets/product_card.dart';
 
 class CategoryWidget extends StatefulWidget {
@@ -41,7 +39,10 @@ class _State extends State<CategoryWidget> {
             padding: const EdgeInsets.only(top: 32, left: 15),
             child: Text(
               widget.category.name,
-              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         const SizedBox(height: 12),
@@ -68,36 +69,24 @@ class _State extends State<CategoryWidget> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ProductCard(
-            width: widget.width,
-            item: widget.products
-                .where((element) => element.groupId == widget.category.id)
-                .toList()[index],
-            color: widget.color),
+          width: widget.width,
+          item: widget.products
+              .where((element) => element.groupId == widget.category.id)
+              .toList()[index],
+          color: widget.color,
+        ),
         if (widget.products
                 .where((element) => element.groupId == widget.category.id)
                 .length >
             index + 1)
           ProductCard(
-              width: widget.width,
-              item: widget.products
-                  .where((element) => element.groupId == widget.category.id)
-                  .toList()[index + 1],
-              color: widget.color)
+            width: widget.width,
+            item: widget.products
+                .where((element) => element.groupId == widget.category.id)
+                .toList()[index + 1],
+            color: widget.color,
+          )
       ],
     );
   }
 }
-/*
-GridView.count(
-shrinkWrap: true,
-primary: false,
-crossAxisCount: 2,
-//crossAxisSpacing: 16,
-//mainAxisSpacing: 12,
-childAspectRatio: 0.8,
-children: widget.category.dishes.map((e) {
-return ProductWidget(
-dish: e,
-);
-}).toList(),
-),*/

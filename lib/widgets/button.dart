@@ -6,8 +6,6 @@ class AddColorButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // var app = p.Provider.of<AppColor>(context);
-
     return Container(
       width: 28,
       height: 28,
