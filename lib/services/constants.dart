@@ -22,7 +22,7 @@ final lightTheme = ThemeData(
   primaryColor: red,
   backgroundColor: Colors.white,
   scaffoldBackgroundColor: Colors.white,
-  cardColor: Colors.white,
+  cardColor: Colors.grey[100],
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Colors.white,
     selectedIconTheme: IconThemeData(color: red),
