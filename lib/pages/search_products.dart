@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_place/google_place.dart';
@@ -32,20 +34,25 @@ class _SearchProductsPageState extends State<SearchProductsPage> {
   List<Product> _searchedProduct = [];
   final _searchController = TextEditingController();
 
+  final StreamController<List<Product>> _streamController =
+      StreamController<List<Product>>();
+
   void _searchProduct() async {
     if (_searchController.text.isNotEmpty) {
-      setState(() {
-        _searchedProduct = widget.products
-            .where((element) => element.name
-                .toLowerCase()
-                .contains(_searchController.text.toLowerCase()))
-            .toList();
-      });
+      _streamController.sink.add(widget.products
+          .where((element) => element.name
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
+          .toList());
     } else {
-      setState(() {
-        _searchedProduct = widget.products;
-      });
+      _streamController.sink.add(widget.products);
     }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Widget buildItem(int index, double width) {
@@ -66,9 +73,6 @@ class _SearchProductsPageState extends State<SearchProductsPage> {
   void initState() {
     super.initState();
     _searchController.addListener(_searchProduct);
-    setState(() {
-      _searchedProduct = widget.products;
-    });
   }
 
   @override
@@ -78,13 +82,15 @@ class _SearchProductsPageState extends State<SearchProductsPage> {
     return Scaffold(
       body: Stack(
         children: [
-          if (_searchedProduct.isEmpty)
-            const Center(
-              child: Text('К сожаление пока нет такого товара('),
-            ),
+          // if (_searchedProduct.isEmpty)
+          //   const Center(
+          //     child: Text('К сожаление пока нет такого товара('),
+          //   ),
           CustomScrollView(
+            physics: BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
+                automaticallyImplyLeading: false,
                 pinned: true,
                 title: TextField(
                   controller: _searchController,
@@ -110,7 +116,12 @@ class _SearchProductsPageState extends State<SearchProductsPage> {
                 ],
               ),
               SliverToBoxAdapter(
-                child: elements(width),
+                child: StreamBuilder<List<Product>>(
+                  stream: _streamController.stream,
+                  initialData: widget.products,
+                  builder: (context, snapshot) =>
+                      elements(width, snapshot.data!),
+                ),
               ),
               SliverToBoxAdapter(
                 child: SizedBox(
@@ -124,10 +135,10 @@ class _SearchProductsPageState extends State<SearchProductsPage> {
     );
   }
 
-  Widget elements(width) {
+  Widget elements(width, List<Product> products) {
     List<Widget> list = [];
-    for (int i = 0; i < _searchedProduct.length; i = i + 2) {
-      list.add(_twoElementsRow(i, width));
+    for (int i = 0; i < products.length; i = i + 2) {
+      list.add(_twoElementsRow(i, width, products));
     }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -135,18 +146,18 @@ class _SearchProductsPageState extends State<SearchProductsPage> {
     );
   }
 
-  Widget _twoElementsRow(int index, width) {
+  Widget _twoElementsRow(int index, width, List<Product> products) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ProductCard(
-          item: _searchedProduct[index],
+          item: products[index],
           color: widget.color,
           width: width,
         ),
-        if (index + 1 < _searchedProduct.length)
+        if (index + 1 < products.length)
           ProductCard(
-            item: _searchedProduct[index + 1],
+            item: products[index + 1],
             color: widget.color,
             width: width,
           ),

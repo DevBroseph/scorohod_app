@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:scorohod_app/pages/account.dart';
 import 'package:scorohod_app/services/constants.dart';
 
 class HomeMenu extends StatelessWidget {
@@ -24,14 +25,17 @@ class HomeMenu extends StatelessWidget {
                   color: red,
                 ),
               ),
-              // ListTile(
-              //   leading: const Icon(
-              //     FontAwesomeIcons.userAlt,
-              //     color: red,
-              //   ),
-              //   title: const Text("Войти"),
-              //   onTap: () {},
-              // ),
+              ListTile(
+                leading: const Icon(
+                  FontAwesomeIcons.userAlt,
+                  color: red,
+                ),
+                title: const Text("Аккаунт"),
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AccountPage()));
+                },
+              ),
               ListTile(
                 leading: const Icon(
                   FontAwesomeIcons.wallet,

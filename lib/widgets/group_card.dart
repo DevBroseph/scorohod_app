@@ -50,7 +50,8 @@ class GroupCard extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           borderRadius: radius,
-          color: Theme.of(context).cardColor,
+          boxShadow: shadow,
+          color: Colors.white,
         ),
         height: 150.0,
         child: Stack(

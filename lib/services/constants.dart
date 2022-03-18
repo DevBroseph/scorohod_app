@@ -11,17 +11,16 @@ const BorderRadius radius = BorderRadius.all(
 
 final List<BoxShadow> shadow = [
   BoxShadow(
-    color: Colors.black.withOpacity(0.1),
-    spreadRadius: 1,
-    blurRadius: 5,
-  ),
+      color: const Color.fromARGB(255, 214, 214, 214).withOpacity(0.4),
+      blurRadius: 10,
+      offset: const Offset(0, 5)),
 ];
 
 final lightTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: red,
   backgroundColor: Colors.white,
-  scaffoldBackgroundColor: Colors.white,
+  scaffoldBackgroundColor: Color(0xFFFBFBFB),
   cardColor: Colors.grey[100],
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Colors.white,
@@ -32,7 +31,7 @@ final lightTheme = ThemeData(
   ),
   appBarTheme: AppBarTheme(
     centerTitle: true,
-    backgroundColor: Colors.white,
+    backgroundColor: Color(0xFFFBFBFB),
     foregroundColor: Colors.black,
     shadowColor: Colors.black.withOpacity(0.2),
     titleTextStyle: const TextStyle(

@@ -32,6 +32,10 @@ dependencies:
 
   http: ^0.13.3  
   flutter_bloc: ^7.0.1
+  provider: ^6.0.1
+  shared_preferences: ^2.0.11
+  overlay_support: ^1.2.1
+  easy_mask: 2.0.1
   cupertino_icons: ^1.0.2
   font_awesome_flutter: ^9.2.0
   google_place: ^0.4.7
@@ -43,6 +47,7 @@ dependencies:
   zoom_pinch_overlay: ^1.1.2
   loading_animation_widget:
   flutter_hooks: ^0.18.2+1
+  another_flushbar: ^1.10.28
 
 
 dev_dependencies:

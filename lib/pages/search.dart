@@ -54,6 +54,7 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       drawer: const HomeMenu(),
       body: CustomScrollView(
+        physics: BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
             pinned: true,

@@ -14,6 +14,7 @@ import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/group_card.dart';
+import 'package:scorohod_app/widgets/order_widget.dart';
 
 class ShopPage extends StatefulWidget {
   const ShopPage({
@@ -102,6 +103,7 @@ class _ShopPageState extends State<ShopPage> {
               ),
             ),
           CustomScrollView(
+            physics: BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
                 pinned: true,
@@ -153,11 +155,16 @@ class _ShopPageState extends State<ShopPage> {
                 ),
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: MediaQuery.of(context).padding.bottom,
+                  height: MediaQuery.of(context).padding.bottom + 100,
                 ),
               ),
             ],
           ),
+          if (_allGroups.isNotEmpty)
+            Align(
+              child: OrderWidget(price: 12, color: _color),
+              alignment: Alignment.bottomCenter,
+            ),
         ],
       ),
     );

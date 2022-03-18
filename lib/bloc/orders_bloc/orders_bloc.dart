@@ -20,13 +20,13 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
           .where((element) => element.id == event.orderElement.id)
           .toList()
           .isNotEmpty) {
-        // products
-        //     .where((element) =>
-        //         element.nomenclatureId == event.product.nomenclatureId)
-        //     .toList()
-        //     .first
-        //     .itemNumber += event.product.itemNumber;
-        products.add(event.orderElement);
+        var product = products
+            .where((element) => element.id == event.orderElement.id)
+            .toList()
+            .first;
+        product.quantity = event.orderElement.quantity;
+        product.price = event.orderElement.price;
+        // products.add(event.orderElement);
       } else {
         products.add(event.orderElement);
       }
@@ -72,7 +72,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       // }
       totalPrice = 0;
       for (var element in products) {
-        totalPrice += element.price * element.quantity;
+        totalPrice += element.basePrice * element.quantity;
       }
 
       yield OrderIdle();

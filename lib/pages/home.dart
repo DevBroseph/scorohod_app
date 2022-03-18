@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:scorohod_app/main.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/pages/shop.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/home_menu.dart';
@@ -26,14 +28,16 @@ class _HomePageState extends State<HomePage>
   var _search = false;
 
   TabController? tabController;
-  final List<Widget> _list = [];
+  final List<ShopCell> _list = [];
   List<Shop> _shops = [];
   List<Category> _categories = [];
 
-  Future<void> _update() async {
+  Future<void> _update(DataProvider provider) async {
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
     var result = await NetHandler(context).getShops();
     var categories = await NetHandler(context).getCategories();
+
+    setAddress(provider);
 
     if (categories != null) {
       setState(() {
@@ -66,10 +70,23 @@ class _HomePageState extends State<HomePage>
     });
   }
 
+  void setAddress(DataProvider provider) {
+    if (provider.user.address != '') {
+      setState(() {
+        _address = provider.user.address;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<DataProvider>(context);
     if (_list.isEmpty) {
-      _update();
+      _update(provider);
+    }
+
+    if (provider.user.address != _address) {
+      setAddress(provider);
     }
 
     return Scaffold(
@@ -79,6 +96,7 @@ class _HomePageState extends State<HomePage>
         child: Stack(
           children: [
             CustomScrollView(
+              physics: BouncingScrollPhysics(),
               slivers: [
                 if (_categories.isNotEmpty)
                   SliverAppBar(
@@ -107,24 +125,61 @@ class _HomePageState extends State<HomePage>
                   child: SizedBox(height: 15),
                 ),
                 if (_categories.isNotEmpty)
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Text(
-                        "Продукты",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                        (context, index) => Align(
+                              alignment: Alignment.topLeft,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_list
+                                      .where((element) =>
+                                          element.shop.categoryId ==
+                                          _categories[index].categoryId)
+                                      .isNotEmpty)
+                                    Padding(
+                                      padding: EdgeInsets.all(15),
+                                      child: Text(
+                                        _categories[index].categoryName,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  Wrap(
+                                    runSpacing: 15,
+                                    children: _list
+                                        .where((element) =>
+                                            element.shop.categoryId ==
+                                            _categories[index].categoryId)
+                                        .toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        childCount: _categories.length),
                   ),
-                SliverFillRemaining(
-                  child: Wrap(
-                    runSpacing: 15,
-                    children: _list,
-                  ),
-                ),
+                // if (_categories.isNotEmpty)
+                //   SliverToBoxAdapter(
+                //     child: Padding(
+                //       padding: EdgeInsets.all(15),
+                //       child: Text(
+                //         _categories[0].categoryName,
+                //         style: TextStyle(
+                //           fontSize: 18,
+                //           fontWeight: FontWeight.bold,
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // SliverFillRemaining(
+                //   child: Wrap(
+                //     runSpacing: 15,
+                //     children: _list,
+                //   ),
+                // ),
               ],
             ),
             if (_search)
@@ -138,7 +193,7 @@ class _HomePageState extends State<HomePage>
                   debugPrint(address);
                   setState(() {
                     _search = false;
-                    _address = address;
+                    provider.user.address = address;
                   });
                 },
               ),

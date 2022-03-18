@@ -5,6 +5,9 @@ List<Product> productsFromJson(String str) =>
 
 Product productFromJson(String str) => Product.fromJson(json.decode(str));
 
+String productToJson(List<Product> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
 class Product {
   Product({
     required this.nomenclatureId,
@@ -33,18 +36,32 @@ class Product {
   double price;
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
-        nomenclatureId: json["nomenclature_id"],
-        itemNumber: json["item_number"],
-        name: json["name"],
-        shopId: json["shop_id"],
-        groupId: json["group_id"],
-        image: json["image"],
-        description: json["description"],
-        measure: json["measure"],
-        manufacturer: json["manufacturer"],
-        terms: json["terms"],
+        nomenclatureId: json["nomenclature_id"] ?? '',
+        itemNumber: json["item_number"] ?? '',
+        name: json["name"] ?? '',
+        shopId: json["shop_id"] ?? '',
+        groupId: json["group_id"] ?? '',
+        image: json["image"] ?? '',
+        description: json["description"] ?? '',
+        measure: json["measure"] ?? '',
+        manufacturer: json["manufacturer"] ?? '',
+        terms: json["terms"] ?? '',
         price: (int.tryParse(json['price'].toString()) ??
                 double.parse(json['price'].toString()))
             .toDouble(),
       );
+
+  Map<String, dynamic> toJson() => {
+        "nomenclature_id": nomenclatureId,
+        "item_number": itemNumber,
+        "name": name,
+        "shop_id": shopId,
+        "group_id": groupId,
+        "image": image,
+        "description": description,
+        "measure": measure,
+        "manufacturer": manufacturer,
+        "terms": terms,
+        "price": price,
+      };
 }

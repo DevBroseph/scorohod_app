@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -31,6 +32,8 @@ class _State extends State<ProductInfoBottomDialog> {
   int count = 0;
   bool countTrue = false;
 
+  StreamController<int> _countStreamController = StreamController<int>();
+
   @override
   Widget build(BuildContext context) {
     var bottom = MediaQuery.of(context).padding.bottom;
@@ -40,16 +43,10 @@ class _State extends State<ProductInfoBottomDialog> {
       if (block.products
           .where((element) => element.name == widget.product.name)
           .isNotEmpty) {
-        setState(() {
-          count = block.products
-              .firstWhere((element) => element.name == widget.product.name)
-              .quantity;
-          countTrue = true;
-        });
-      } else {
-        // setState(() {
-        //   count++;
-        // });
+        _countStreamController.sink.add(count = block.products
+            .firstWhere((element) => element.name == widget.product.name)
+            .quantity);
+        countTrue = true;
       }
     }
 
@@ -75,9 +72,9 @@ class _State extends State<ProductInfoBottomDialog> {
               ),
               Container(
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: const BorderRadius.only(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(28),
                     topRight: Radius.circular(28),
                   ),
@@ -120,8 +117,8 @@ class _State extends State<ProductInfoBottomDialog> {
                                 minScale: 0.5,
                                 maxScale: 3.0,
                                 twoTouchOnly: true,
-                                child: Image.memory(
-                                  base64Decode(widget.product.image),
+                                child: Image.network(
+                                  widget.product.image,
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -210,9 +207,40 @@ class _State extends State<ProductInfoBottomDialog> {
                               if (widget.product.manufacturer.isNotEmpty)
                                 Padding(
                                   padding:
-                                      const EdgeInsets.fromLTRB(15, 10, 15, 15),
+                                      const EdgeInsets.fromLTRB(15, 10, 15, 0),
                                   child: Text(
                                     widget.product.manufacturer,
+                                    textAlign: TextAlign.start,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                      height: 1.5,
+                                      fontFamily: 'SFUI',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              Container(
+                                width: double.infinity,
+                                height: 0.1,
+                                color: Colors.grey[700],
+                                margin: const EdgeInsets.all(15),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(left: 15),
+                                child: Text(
+                                  'Срок годности и условие хранения',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              if (widget.product.terms.isNotEmpty)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(15, 10, 15, 15),
+                                  child: Text(
+                                    widget.product.terms,
                                     textAlign: TextAlign.start,
                                     style: const TextStyle(
                                       fontSize: 14,
@@ -264,8 +292,12 @@ class _State extends State<ProductInfoBottomDialog> {
                               duration: const Duration(milliseconds: 150),
                               bound: 0.05,
                               onTap: () {
-                                if (count > 0) count--;
-                                setState(() {});
+                                // _countStreamController.stream.listen((event) {
+                                if (count > 0) {
+                                  _countStreamController.sink.add(--count);
+                                  // count--;
+                                }
+                                // });
                               },
                               child: Image.asset(
                                 "assets/button_del_big.png",
@@ -277,25 +309,30 @@ class _State extends State<ProductInfoBottomDialog> {
                             SizedBox(
                               width: 36,
                               child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  count.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    height: 1.2,
-                                    fontFamily: 'SFUI',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
+                                  fit: BoxFit.scaleDown,
+                                  child: StreamBuilder<int>(
+                                    stream: _countStreamController.stream,
+                                    builder: (BuildContext buildContext,
+                                        AsyncSnapshot<int> snapshop) {
+                                      return Text(
+                                        snapshop.data.toString(),
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          height: 1.2,
+                                          fontFamily: 'SFUI',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      );
+                                    },
+                                  )),
                             ),
                           if (countTrue == true)
                             ScaleButton(
                               duration: const Duration(milliseconds: 150),
                               bound: 0.05,
                               onTap: () {
-                                count++;
-                                setState(() {});
+                                // count++;
+                                _countStreamController.sink.add(++count);
                               },
                               child: AddColorButton(color: widget.color),
                             ),
@@ -324,30 +361,30 @@ class _State extends State<ProductInfoBottomDialog> {
                                     .products) {
                               totalPrice += widget.product.price;
                             }
-                            if (block.products
-                                .where((element) =>
-                                    element.name == widget.product.name)
-                                .isNotEmpty) {
-                              block.products
-                                  .firstWhere((element) =>
-                                      element.name == widget.product.name)
-                                  .quantity += count != 0 ? count : 1;
-                            } else {
-                              BlocProvider.of<OrdersBloc>(context).add(
-                                AddProduct(
-                                    orderElement: OrderElement(
-                                        id: int.parse(
-                                            widget.product.nomenclatureId),
-                                        basePrice:
-                                            widget.product.price.toDouble(),
-                                        quantity: count != 0 ? count : 1,
-                                        price: (count != 0 ? count : 1) *
-                                            widget.product.price,
-                                        name: widget.product.name,
-                                        weight: widget.product.measure,
-                                        image: widget.product.image)),
-                              );
-                            }
+                            // if (block.products
+                            //     .where((element) =>
+                            //         element.name == widget.product.name)
+                            //     .isNotEmpty) {
+                            //   block.products
+                            //       .firstWhere((element) =>
+                            //           element.name == widget.product.name)
+                            //       .quantity += count != 0 ? count : 1;
+                            // } else {
+                            BlocProvider.of<OrdersBloc>(context).add(
+                              AddProduct(
+                                  orderElement: OrderElement(
+                                      id: int.parse(
+                                          widget.product.nomenclatureId),
+                                      basePrice:
+                                          widget.product.price.toDouble(),
+                                      quantity: count != 0 ? count : 1,
+                                      price: (count != 0 ? count : 1) *
+                                          widget.product.price,
+                                      name: widget.product.name,
+                                      weight: widget.product.measure,
+                                      image: widget.product.image)),
+                            );
+                            // }
                             Navigator.of(context).pop();
                             // }
                             // }

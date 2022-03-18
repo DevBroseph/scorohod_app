@@ -3,8 +3,10 @@ import 'package:http/http.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/error.dart';
 import 'package:scorohod_app/objects/group.dart';
+import 'package:scorohod_app/objects/order.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/objects/shop.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 
@@ -66,7 +68,6 @@ class NetHandler {
       url: "categories",
       method: Method.get,
     );
-
     return data != null ? categoriesFromJson(data) : null;
   }
 
@@ -75,6 +76,7 @@ class NetHandler {
       url: "shops",
       method: Method.get,
     );
+    // print(data);
 
     return data != null ? shopsFromJson(data) : null;
   }
@@ -93,7 +95,27 @@ class NetHandler {
       url: "nomenclatures",
       method: Method.get,
     );
-
+    // print(data);
     return data != null ? productsFromJson(data) : null;
+  }
+
+  Future<Order?> createOrder(List<Product> products, String clientId, int price,
+      String address, int discount, String shopId) async {
+    var data = await _request(
+      url: "order",
+      params: {
+        'status': 'new_order',
+        'products': productToJson(products),
+        'total_price': price.toString(),
+        'client_id': clientId,
+        'address': address,
+        'discount': discount.toString(),
+        'receipt_id': 'null',
+        'shop_id': shopId,
+      },
+      method: Method.post,
+    );
+    // print(data);
+    return data != null ? orderFromJson(data) : null;
   }
 }
