@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:image/image.dart' as img;
 import 'package:scorohod_app/pages/group.dart';
 import 'package:scorohod_app/pages/home.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
@@ -19,10 +21,7 @@ import 'package:scorohod_app/widgets/order_widget.dart';
 class ShopPage extends StatefulWidget {
   const ShopPage({
     Key? key,
-    required this.shop,
   }) : super(key: key);
-
-  final Shop shop;
 
   @override
   _ShopPageState createState() => _ShopPageState();
@@ -59,8 +58,8 @@ class _ShopPageState extends State<ShopPage> {
     return (argbColor & 0xFF00FF00) | (b << 16) | r;
   }
 
-  void _getColor() {
-    List<int> values = base64Decode(widget.shop.shopLogo).buffer.asUint8List();
+  void _getColor(Shop shop) {
+    List<int> values = base64Decode(shop.shopLogo).buffer.asUint8List();
     var photo = img.decodeImage(values);
 
     if (photo == null) return;
@@ -77,15 +76,11 @@ class _ShopPageState extends State<ShopPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _getColor();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    var shop = Provider.of<DataProvider>(context);
     if (_allGroups.isEmpty) {
       _update();
+      _getColor(shop.currentShop);
     }
 
     return Scaffold(
@@ -109,7 +104,7 @@ class _ShopPageState extends State<ShopPage> {
                 pinned: true,
                 foregroundColor: _color,
                 title: Text(
-                  widget.shop.shopName,
+                  shop.currentShop.shopName,
                   style: TextStyle(
                       fontSize: 18, color: _color, fontWeight: FontWeight.bold),
                 ),

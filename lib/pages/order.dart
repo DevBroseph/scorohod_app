@@ -1,12 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
+import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
+import 'package:scorohod_app/pages/order_info.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/services/app_data.dart';
+import 'package:scorohod_app/services/extensions.dart';
+import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/custom_text_field.dart';
+import 'package:scorohod_app/widgets/deliver_widget.dart';
+import 'package:scorohod_app/widgets/my_flushbar.dart';
 
 class OrderPage extends StatefulWidget {
   final Color color;
-  const OrderPage({Key? key, required this.color}) : super(key: key);
+  final Function() onTap;
+  const OrderPage({Key? key, required this.color, required this.onTap})
+      : super(key: key);
 
   @override
   State<OrderPage> createState() => _OrderPageState();
@@ -60,9 +72,56 @@ class _OrderPageState extends State<OrderPage> {
     }
   }
 
+  void createOrder(OrdersBloc ordersBloc, DataProvider provider) async {
+    if (_nameController.text == '') {
+      MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите имя.');
+      return;
+    }
+    if (_phoneController.text == '') {
+      MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите номер телефона.');
+      return;
+    }
+    if (_phoneController.text.length < 19) {
+      MyFlushbar.showFlushbar(
+          context, 'Ошибка.', 'Номер телефона указан неверно.');
+      return;
+    }
+    if (_addressController.text == '' ||
+        _addressController.text == 'Нажмите, чтобы выбрать адрес.') {
+      MyFlushbar.showFlushbar(context, 'Скороход.', 'Укажите адрес доставки.');
+      return;
+    }
+    var result = await NetHandler(context).createOrder(
+        ordersBloc.products,
+        'test',
+        ordersBloc.totalPrice,
+        provider.user.address,
+        0.0,
+        provider.currentShop.shopId);
+
+    if (result != null) {
+      widget.onTap;
+      BlocProvider.of<OrdersBloc>(context).add(RemoveProducts());
+      MyFlushbar.showFlushbar(context, 'Успешно.', 'Заказ оформлен.');
+      Timer(const Duration(seconds: 4), () {
+        Navigator.pop(context);
+        context.nextPage(
+            OrderInfoPage(
+              color: widget.color,
+              order: result,
+              shop: provider.currentShop,
+            ),
+            fullscreenDialog: true);
+      });
+    } else {
+      MyFlushbar.showFlushbar(context, 'Ошибка.', 'Не удалось оформить заказ.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var provider = Provider.of<DataProvider>(context);
+    var bloc = BlocProvider.of<OrdersBloc>(context);
 
     if (!_loadData) {
       setUserData(provider);
@@ -112,7 +171,7 @@ class _OrderPageState extends State<OrderPage> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.only(
+                  padding: const EdgeInsets.only(
                       bottom: 16.0, left: 15, right: 15, top: 10),
                   child: Row(
                     children: [
@@ -206,6 +265,14 @@ class _OrderPageState extends State<OrderPage> {
                 });
               },
             ),
+          Align(
+            child: DeliverWidget(
+              price: 12,
+              color: widget.color,
+              onTap: () => createOrder(bloc, provider),
+            ),
+            alignment: Alignment.bottomCenter,
+          ),
         ],
       ),
     );
@@ -228,7 +295,10 @@ class _OrderPageState extends State<OrderPage> {
         padding: EdgeInsets.only(left: index > 0 ? 16 : 0),
         child: InkWell(
           onTap: () {
-            // _selectedPayment = _payment[index];
+            if (index != 0) {
+              MyFlushbar.showFlushbar(context, 'Скороход.',
+                  'К сожалению пока не доступна оплата картой.');
+            }
             setState(() {});
           },
           borderRadius: const BorderRadius.all(Radius.circular(14)),

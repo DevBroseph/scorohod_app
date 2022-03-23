@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_state.dart';
 import 'package:scorohod_app/pages/basket.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
+import 'package:scorohod_app/widgets/my_flushbar.dart';
 
 class OrderWidget extends StatefulWidget {
   final int price;
@@ -23,12 +26,15 @@ class OrderWidget extends StatefulWidget {
 class _State extends State<OrderWidget> {
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<DataProvider>(context);
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
         if (BlocProvider.of<OrdersBloc>(context).products.isEmpty) {
           return Container();
         } else {
           double sum = BlocProvider.of<OrdersBloc>(context).totalPrice;
+          var shopMinSum =
+              Provider.of<DataProvider>(context).currentShop.shopMinSum;
 
           return Container(
             decoration: BoxDecoration(
@@ -40,19 +46,24 @@ class _State extends State<OrderWidget> {
               ),
             ),
             width: double.infinity,
-            height: 85 + MediaQuery.of(context).padding.bottom,
+            height: 95 + MediaQuery.of(context).padding.bottom,
             child: Column(
               children: [
                 ScaleButton(
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) => BasketPage(
-                          color: widget.color,
+                    if (sum < int.parse(shopMinSum)) {
+                      MyFlushbar.showFlushbar(
+                          context, 'Ошибка.', 'Недостаточная сумма.');
+                    } else {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (context) => BasketPage(
+                            color: widget.color,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   },
                   duration: const Duration(milliseconds: 150),
                   bound: 0.05,
@@ -62,7 +73,9 @@ class _State extends State<OrderWidget> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
-                      color: widget.color,
+                      color: sum < int.parse(shopMinSum)
+                          ? Colors.grey[400]
+                          : widget.color,
                       boxShadow: shadow,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -80,7 +93,7 @@ class _State extends State<OrderWidget> {
                           ),
                         ),
                         Text(
-                          "${sum.toStringAsFixed(2)} ₽",
+                          "${(sum + int.parse(provider.currentShop.shopPriceDelivery)).toStringAsFixed(2)} ₽",
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.white,
@@ -93,6 +106,9 @@ class _State extends State<OrderWidget> {
                     ),
                   ),
                 ),
+                Align(
+                    alignment: Alignment.topCenter,
+                    child: Text('Минимальная сумма заказа: $shopMinSum₽'))
               ],
             ),
           );

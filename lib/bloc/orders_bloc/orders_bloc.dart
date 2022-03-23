@@ -100,5 +100,15 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
 
       yield OrderIdle();
     }
+
+    if (event is RemoveProducts) {
+      yield OrderLoading();
+
+      products = [];
+
+      totalPrice = 0;
+
+      yield OrderIdle();
+    }
   }
 }

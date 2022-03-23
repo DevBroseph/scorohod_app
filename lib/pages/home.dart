@@ -1,8 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
+import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
 import 'package:scorohod_app/main.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/shop.dart';
@@ -32,7 +36,7 @@ class _HomePageState extends State<HomePage>
   List<Shop> _shops = [];
   List<Category> _categories = [];
 
-  Future<void> _update(DataProvider provider) async {
+  Future<void> _update(DataProvider provider, OrdersBloc bloc) async {
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
     var result = await NetHandler(context).getShops();
     var categories = await NetHandler(context).getCategories();
@@ -51,14 +55,34 @@ class _HomePageState extends State<HomePage>
     for (var item in result) {
       _list.add(
         ShopCell(
-          shop: item,
-          width: width,
-          onTap: () => context.nextPage(
-            ShopPage(
-              shop: item,
-            ),
-          ),
-        ),
+            shop: item,
+            width: width,
+            onTap: () async {
+              if (provider.currentShop != item && bloc.products.isNotEmpty) {
+                final clickedButton =
+                    await FlutterPlatformAlert.showCustomAlert(
+                        windowTitle:
+                            'Чтобы зайти в другой магазин необходимо очистить корзину.',
+                        text: 'Очистить?',
+                        positiveButtonTitle: 'Да',
+                        negativeButtonTitle: 'Нет',
+                        // alertStyle: AlertButtonStyle.yesNoCancel,
+                        iconStyle: IconStyle.information,
+                        windowPosition: AlertWindowPosition.screenCenter);
+                if (clickedButton == CustomButton.positiveButton) {
+                  BlocProvider.of<OrdersBloc>(context).add(RemoveProducts());
+                  provider.setShop(item);
+                  context.nextPage(
+                    ShopPage(),
+                  );
+                }
+              } else {
+                provider.setShop(item);
+                context.nextPage(
+                  ShopPage(),
+                );
+              }
+            }),
       );
     }
 
@@ -81,8 +105,9 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     var provider = Provider.of<DataProvider>(context);
+    var bloc = BlocProvider.of<OrdersBloc>(context);
     if (_list.isEmpty) {
-      _update(provider);
+      _update(provider, bloc);
     }
 
     if (provider.user.address != _address) {

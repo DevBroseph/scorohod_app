@@ -48,6 +48,8 @@ dependencies:
   loading_animation_widget:
   flutter_hooks: ^0.18.2+1
   another_flushbar: ^1.10.28
+  flutter_platform_alert: ^0.2.2
+  intl: ^0.17.0
 
 
 dev_dependencies:

@@ -1,6 +1,11 @@
 import 'dart:convert';
 
+import 'package:scorohod_app/objects/order_element.dart';
+
 Order orderFromJson(String str) => Order.fromJson(json.decode(str));
+
+List<Order> ordersFromJson(String str) =>
+    List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
 
 String orderToJson(Order data) => json.encode(data.toJson());
 
@@ -21,7 +26,7 @@ class Order {
   String orderId;
   String date;
   String status;
-  String products;
+  List<OrderElement> products;
   String totalPrice;
   String clientId;
   String address;
@@ -31,9 +36,9 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
         orderId: json["order_id"],
-        date: json["date"],
+        date: json["date"] ?? '',
         status: json["status"],
-        products: json["products"],
+        products: ordersElementFromJson(json["products"]),
         totalPrice: json["total_price"],
         clientId: json["client_id"],
         address: json["address"],

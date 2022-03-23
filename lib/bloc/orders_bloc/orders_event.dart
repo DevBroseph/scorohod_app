@@ -31,3 +31,5 @@ class RemoveProductFromHomePage extends OrdersEvent {
     required this.product,
   });
 }
+
+class RemoveProducts extends OrdersEvent {}

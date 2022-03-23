@@ -4,6 +4,7 @@ import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/error.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/order.dart';
+import 'package:scorohod_app/objects/order_element.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
@@ -99,13 +100,13 @@ class NetHandler {
     return data != null ? productsFromJson(data) : null;
   }
 
-  Future<Order?> createOrder(List<Product> products, String clientId, int price,
-      String address, int discount, String shopId) async {
+  Future<Order?> createOrder(List<OrderElement> orderElements, String clientId,
+      double price, String address, double discount, String shopId) async {
     var data = await _request(
       url: "order",
       params: {
         'status': 'new_order',
-        'products': productToJson(products),
+        'products': ordersElementsToJson(orderElements),
         'total_price': price.toString(),
         'client_id': clientId,
         'address': address,
@@ -115,7 +116,14 @@ class NetHandler {
       },
       method: Method.post,
     );
-    // print(data);
     return data != null ? orderFromJson(data) : null;
+  }
+
+  Future<List<Order>?> getOrders(String clientId) async {
+    var data = await _request(
+      url: "order/$clientId",
+      method: Method.get,
+    );
+    return data != null ? ordersFromJson(data) : null;
   }
 }

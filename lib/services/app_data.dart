@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scorohod_app/objects/shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
@@ -103,28 +104,159 @@ class AppData {
   }
 }
 
+class ShopData {
+  ShopData(this._preferences);
+
+  final SharedPreferences _preferences;
+
+  final String _shopId = "shopId";
+  final String _shopName = "shopName";
+  final String _shopLogo = "shopLogo";
+  final String _categoryId = "categoryId";
+  final String _shopDescription = "shopDescription";
+  final String _shopMinSum = "shopMinSum";
+  final String _shopPriceDelivery = "shopPriceDelivery";
+  final String _shopWorkingHours = "shopWorkingHours";
+  final String _shopStatus = "shopStatus";
+
+  static Future<ShopData> getInstance() async {
+    var shared = await SharedPreferences.getInstance();
+    return ShopData(shared);
+  }
+
+  String getShopId() {
+    return _preferences.getString(_shopId) ?? "";
+  }
+
+  void setShopId(String value) {
+    _preferences.setString(_shopId, value);
+  }
+
+  String getShopName() {
+    return _preferences.getString(_shopName) ?? '';
+  }
+
+  void setShopName(String value) {
+    _preferences.setString(_shopName, value);
+  }
+
+  String getShopLogo() {
+    return _preferences.getString(_shopLogo) ?? "";
+  }
+
+  void setShopLogo(String value) {
+    _preferences.setString(_shopLogo, value);
+  }
+
+  String getCategoryId() {
+    return _preferences.getString(_categoryId) ?? "";
+  }
+
+  void setCategoryId(String value) {
+    _preferences.setString(_categoryId, value);
+  }
+
+  String getShopDescription() {
+    return _preferences.getString(_shopDescription) ?? '';
+  }
+
+  void setShopDescription(String value) {
+    _preferences.setString(_shopDescription, value);
+  }
+
+  String getShopMinSum() {
+    return _preferences.getString(_shopMinSum) ?? "";
+  }
+
+  void setShopMinSum(String value) {
+    _preferences.setString(_shopMinSum, value);
+  }
+
+  String getPriceDelivery() {
+    return _preferences.getString(_shopPriceDelivery) ?? "";
+  }
+
+  void setPriceDelivery(String value) {
+    _preferences.setString(_shopPriceDelivery, value);
+  }
+
+  String getWorkingHours() {
+    return _preferences.getString(_shopWorkingHours) ?? '';
+  }
+
+  void setWorkingHours(String value) {
+    _preferences.setString(_shopWorkingHours, value);
+  }
+
+  String getShopStatus() {
+    return _preferences.getString(_shopStatus) ?? "";
+  }
+
+  void setShopStatus(String value) {
+    _preferences.setString(_shopStatus, value);
+  }
+
+  void setShop(Shop shop) {
+    _preferences.setString(_shopId, shop.shopId);
+    _preferences.setString(_shopName, shop.shopName);
+    _preferences.setString(_shopLogo, shop.shopLogo);
+    _preferences.setString(_categoryId, shop.categoryId);
+    _preferences.setString(_shopDescription, shop.shopDescription);
+    _preferences.setString(_shopMinSum, shop.shopMinSum);
+    _preferences.setString(_shopPriceDelivery, shop.shopPriceDelivery);
+    _preferences.setString(_shopWorkingHours, shop.shopWorkingHours);
+    _preferences.setString(_shopStatus, shop.shopStatus);
+  }
+
+  void setEmptyShop() {
+    _preferences.setString(_shopId, '');
+    _preferences.setString(_shopName, '');
+    _preferences.setString(_shopLogo, '');
+    _preferences.setString(_categoryId, '');
+    _preferences.setString(_shopDescription, '');
+    _preferences.setString(_shopMinSum, '');
+    _preferences.setString(_shopPriceDelivery, '');
+    _preferences.setString(_shopWorkingHours, '');
+    _preferences.setString(_shopStatus, '');
+  }
+}
+
 class DataProvider extends ChangeNotifier {
-  DataProvider(
-    this._user,
-  );
+  DataProvider(this._user, this._currentShop);
 
   User _user;
-
   User get user => _user;
-
   bool get hasUser => _user.name != '' ? true : false;
+
+  Shop _currentShop;
+  Shop get currentShop => _currentShop;
+  bool get hasCurrentShop => _currentShop.shopName != '' ? true : false;
 
   static Future<DataProvider> getInstance() async {
     var userPrefs = await AppData.getInstance();
+    var shopPrefs = await ShopData.getInstance();
 
-    return DataProvider(User(
-      name: userPrefs.getUserName(),
-      phone: userPrefs.getUserPhone(),
-      address: userPrefs.getUserAddress(),
-      room: userPrefs.getUserRoom(),
-      entrance: userPrefs.getUserEntrance(),
-      floor: userPrefs.getUserFloor(),
-    ));
+    return DataProvider(
+      User(
+        name: userPrefs.getUserName(),
+        phone: userPrefs.getUserPhone(),
+        address: userPrefs.getUserAddress(),
+        room: userPrefs.getUserRoom(),
+        entrance: userPrefs.getUserEntrance(),
+        floor: userPrefs.getUserFloor(),
+      ),
+      Shop(
+        categoryId: shopPrefs.getCategoryId(),
+        shopDescription: shopPrefs.getShopDescription(),
+        shopId: shopPrefs.getShopId(),
+        shopLogo: shopPrefs.getShopLogo(),
+        shopMinSum: shopPrefs.getShopMinSum(),
+        shopName: shopPrefs.getShopName(),
+        shopPriceDelivery: shopPrefs.getPriceDelivery(),
+        shopStatus: shopPrefs.getShopStatus(),
+        shopWorkingHours: shopPrefs.getWorkingHours(),
+      ),
+    );
   }
 
   void setUser(User user) {
@@ -138,6 +270,25 @@ class DataProvider extends ChangeNotifier {
         value.setUserRoom(user.room);
         value.setUserEnrance(user.entrance);
         value.setUserFloor(user.floor);
+      },
+    );
+    changeUser(user);
+  }
+
+  void setShop(Shop shop) {
+    _currentShop = shop;
+    notifyListeners();
+    ShopData.getInstance().then(
+      (value) {
+        value.setShopId(shop.shopId);
+        value.setShopName(shop.shopName);
+        value.setShopLogo(shop.shopLogo);
+        value.setCategoryId(shop.categoryId);
+        value.setShopDescription(shop.shopDescription);
+        value.setShopMinSum(shop.shopMinSum);
+        value.setPriceDelivery(shop.shopPriceDelivery);
+        value.setWorkingHours(shop.shopWorkingHours);
+        value.setShopStatus(shop.shopStatus);
       },
     );
     changeUser(user);
@@ -210,6 +361,14 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
     AppData.getInstance().then((value) {
       value.setUser(user);
+    });
+  }
+
+  void changeShop(Shop shop) {
+    _currentShop = shop;
+    notifyListeners();
+    ShopData.getInstance().then((value) {
+      value.setShop(shop);
     });
   }
 }

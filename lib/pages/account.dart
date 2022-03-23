@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_alert/flutter_platform_alert.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
@@ -56,6 +58,26 @@ class _AccountPageState extends State<AccountPage> {
         _floorController.text = '';
         _loadData = true;
       });
+    }
+  }
+
+  void showAlert(DataProvider provider) async {
+    // await FlutterPlatformAlert.playAlertSound();
+
+    final clickedButton = await FlutterPlatformAlert.showCustomAlert(
+        windowTitle: 'Выйти из аккаунта?',
+        text: '',
+        positiveButtonTitle: 'Да',
+        negativeButtonTitle: 'Нет',
+        // alertStyle: AlertButtonStyle.yesNoCancel,
+        iconStyle: IconStyle.information,
+        windowPosition: AlertWindowPosition.screenCenter);
+    if (clickedButton == CustomButton.positiveButton) {
+      provider.signOutUser();
+      setState(() {
+        _loadData = false;
+      });
+      MyFlushbar.showFlushbar(context, 'Успешно.', 'Данные были удалены.');
     }
   }
 
@@ -119,15 +141,20 @@ class _AccountPageState extends State<AccountPage> {
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: IconButton(
-                        onPressed: () {
-                          provider.signOutUser();
-                          setState(() {
-                            _loadData = false;
-                          });
-                          MyFlushbar.showFlushbar(
-                              context, 'Успешно.', 'Данные были удалены.');
-                        },
-                        icon: const Icon(Icons.person_remove)),
+                      onPressed: () {
+                        showAlert(provider);
+                        // provider.signOutUser();
+                        // setState(() {
+                        //   _loadData = false;
+                        // });
+                        // MyFlushbar.showFlushbar(
+                        //     context, 'Успешно.', 'Данные были удалены.');
+                      },
+                      icon: const Icon(
+                        FontAwesomeIcons.trashAlt,
+                        size: 20,
+                      ),
+                    ),
                   )
                 ],
               ),

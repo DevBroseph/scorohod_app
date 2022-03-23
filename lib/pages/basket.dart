@@ -4,14 +4,18 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_platform_alert/flutter_platform_alert.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_state.dart';
 import 'package:scorohod_app/objects/order_element.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/widgets/button.dart';
-import 'package:scorohod_app/widgets/deliver_widget.dart';
+import 'package:scorohod_app/widgets/basket_widget.dart';
 
 class BasketPage extends StatefulWidget {
   final Color color;
@@ -25,88 +29,122 @@ class _BasketPageState extends State<BasketPage> {
   @override
   Widget build(BuildContext context) {
     var block = BlocProvider.of<OrdersBloc>(context);
+    var provider = Provider.of<DataProvider>(context);
     if (block.products.isEmpty) {
       Timer(
           const Duration(milliseconds: 300), () => Navigator.maybePop(context));
     }
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
-            SliverAppBar(
-              pinned: true,
-              // elevation: 0,
-              foregroundColor: widget.color,
-              // expandedHeight: 210,
-              title: Text(
-                'Корзина',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: widget.color,
+    void _removeAllFromBasket() async {
+      final clickedButton = await FlutterPlatformAlert.showCustomAlert(
+          windowTitle: 'Вы точно хотите очистить корзину?',
+          text: '',
+          positiveButtonTitle: 'Да',
+          negativeButtonTitle: 'Нет',
+          iconStyle: IconStyle.information,
+          windowPosition: AlertWindowPosition.screenCenter);
+      if (clickedButton == CustomButton.positiveButton) {
+        BlocProvider.of<OrdersBloc>(context).add(RemoveProducts());
+        Navigator.pop(context);
+      }
+    }
+
+    return BlocBuilder<OrdersBloc, OrdersState>(builder: (context, snapshot) {
+      return Scaffold(
+        body: Stack(
+          children: [
+            CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
+              SliverAppBar(
+                pinned: true,
+                // elevation: 0,
+                foregroundColor: widget.color,
+                // expandedHeight: 210,
+                title: Text(
+                  'Корзина',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: widget.color,
+                  ),
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 15),
+                    child: IconButton(
+                        onPressed: _removeAllFromBasket,
+                        icon: const Icon(
+                          FontAwesomeIcons.trashAlt,
+                          size: 20,
+                        )),
+                  )
+                ],
+              ),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 15,
                 ),
               ),
-            ),
-            const SliverToBoxAdapter(
-              child: SizedBox(
-                height: 15,
-              ),
-            ),
-            if (block.products.isNotEmpty)
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                    (context, index) => basketCard(block, index),
-                    childCount:
-                        BlocProvider.of<OrdersBloc>(context).products.length),
-              ),
-            SliverToBoxAdapter(
-              child: Container(
-                width: double.infinity,
-                margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: SizedBox(
-                        width: 110,
-                        child: Row(
-                          children: const [
-                            Text(
-                              'Доставка',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Icon(Icons.info_outline),
-                          ],
+              if (block.products.isNotEmpty)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                      (context, index) => basketCard(block, index),
+                      childCount:
+                          BlocProvider.of<OrdersBloc>(context).products.length),
+                ),
+              SliverToBoxAdapter(
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: SizedBox(
+                          width: 110,
+                          child: Row(
+                            children: const [
+                              Text(
+                                'Доставка',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Icon(Icons.info_outline),
+                            ],
+                          ),
+                        ),
+                        trailing: Text(
+                          provider.currentShop.shopPriceDelivery + ' ₽',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
-                      trailing: const Text(
-                        'Бесплатно',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SliverToBoxAdapter(
-              child: SizedBox(
-                height: 130,
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 130,
+                ),
               ),
+            ]),
+            Align(
+              child: BasketWidget(
+                price: 12,
+                color: widget.color,
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              alignment: Alignment.bottomCenter,
             ),
-          ]),
-          Align(
-            child: DeliverWidget(price: 12, color: widget.color),
-            alignment: Alignment.bottomCenter,
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget basketCard(OrdersBloc block, int index) {

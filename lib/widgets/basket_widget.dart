@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_state.dart';
 import 'package:scorohod_app/pages/order.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 
-class DeliverWidget extends StatefulWidget {
+class BasketWidget extends StatefulWidget {
   final int price;
   final Color color;
   final Function() onTap;
 
-  const DeliverWidget({
+  const BasketWidget({
     Key? key,
     required this.price,
     required this.color,
@@ -22,9 +24,10 @@ class DeliverWidget extends StatefulWidget {
   _State createState() => _State();
 }
 
-class _State extends State<DeliverWidget> {
+class _State extends State<BasketWidget> {
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<DataProvider>(context);
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
         if (BlocProvider.of<OrdersBloc>(context).products.isEmpty) {
@@ -38,7 +41,18 @@ class _State extends State<DeliverWidget> {
             child: Column(
               children: [
                 ScaleButton(
-                  onTap: widget.onTap,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => OrderPage(
+                          color: widget.color,
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    );
+                  },
                   duration: const Duration(milliseconds: 150),
                   bound: 0.05,
                   child: Container(
@@ -55,7 +69,7 @@ class _State extends State<DeliverWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          "Оформить заказ",
+                          "Перейти к оформлению",
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white,
@@ -65,7 +79,7 @@ class _State extends State<DeliverWidget> {
                           ),
                         ),
                         Text(
-                          "${sum.toStringAsFixed(2)} ₽",
+                          "${(sum + int.parse(provider.currentShop.shopPriceDelivery)).toStringAsFixed(2)} ₽",
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.white,
