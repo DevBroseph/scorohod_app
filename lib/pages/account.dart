@@ -1,15 +1,21 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:another_flushbar/flushbar.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
+import 'package:scorohod_app/pages/phone.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
+import 'package:scorohod_app/services/extensions.dart';
+import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/custom_text_field.dart';
 import 'package:scorohod_app/widgets/my_flushbar.dart';
 
@@ -30,6 +36,9 @@ class _AccountPageState extends State<AccountPage> {
   final _entranceController = TextEditingController();
   final _floorController = TextEditingController();
 
+  firebase.FirebaseAuth auth = firebase.FirebaseAuth.instance;
+
+  LatLng _latLng = LatLng(0, 0);
   bool _loadData = false;
   bool _search = false;
 
@@ -52,7 +61,11 @@ class _AccountPageState extends State<AccountPage> {
       setState(() {
         _addressController.text = 'Нажмите, чтобы выбрать адрес.';
         _nameController.text = '';
-        _phoneController.text = '';
+        if (provider.user.phone != '') {
+          _phoneController.text = provider.user.phone;
+        } else {
+          _phoneController.text = '';
+        }
         _roomController.text = '';
         _entranceController.text = '';
         _floorController.text = '';
@@ -74,14 +87,21 @@ class _AccountPageState extends State<AccountPage> {
         windowPosition: AlertWindowPosition.screenCenter);
     if (clickedButton == CustomButton.positiveButton) {
       provider.signOutUser();
+
       setState(() {
         _loadData = false;
+        _addressController.text = 'Нажмите, чтобы выбрать адрес.';
+        _nameController.text = '';
+        _phoneController.text = '';
+        _roomController.text = '';
+        _entranceController.text = '';
+        _floorController.text = '';
       });
       MyFlushbar.showFlushbar(context, 'Успешно.', 'Данные были удалены.');
     }
   }
 
-  void putUserData(DataProvider provider) {
+  Future<void> putUserData(DataProvider provider) async {
     if (_nameController.text == '') {
       MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите имя.');
       return;
@@ -100,14 +120,61 @@ class _AccountPageState extends State<AccountPage> {
       MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите адрес доставки.');
       return;
     }
-    MyFlushbar.showFlushbar(context, 'Успешно.', 'Данные были сохранены.');
-    provider.setUser(User(
-        name: _nameController.text,
-        phone: _phoneController.text,
-        address: _addressController.text,
-        room: _roomController.text,
-        entrance: _entranceController.text,
-        floor: _floorController.text));
+    print(provider.hasUser);
+    if (provider.user.id == '') {
+      var result = await NetHandler(context).auth(
+          _nameController.text,
+          _phoneController.text,
+          '',
+          '',
+          Platform.isIOS ? 'Ios' : 'Android',
+          _addressController.text,
+          _roomController.text,
+          _entranceController.text,
+          _floorController.text);
+
+      if (result != null) {
+        provider.setUser(User(
+            id: result.userId,
+            name: result.userName,
+            phone: result.phone,
+            address: result.address,
+            room: result.room,
+            entrance: result.entrance,
+            floor: result.floor,
+            latLng: _latLng));
+        MyFlushbar.showFlushbar(context, 'Успешно.', 'Данные были сохранены.');
+      } else {
+        MyFlushbar.showFlushbar(context, 'Ошибка.', 'Данные не сохранены.');
+      }
+    } else {
+      var result = await NetHandler(context).updateUser(
+          provider.user.id,
+          _nameController.text,
+          _phoneController.text,
+          '',
+          '',
+          Platform.isIOS ? 'Ios' : 'Android',
+          _addressController.text,
+          _roomController.text,
+          _entranceController.text,
+          _floorController.text);
+
+      if (result != null) {
+        provider.setUser(User(
+            id: result.userId,
+            name: result.userName,
+            phone: result.phone,
+            address: result.address,
+            room: result.room,
+            entrance: result.entrance,
+            floor: result.floor,
+            latLng: _latLng));
+        MyFlushbar.showFlushbar(context, 'Успешно.', 'Данные были сохранены.');
+      } else {
+        MyFlushbar.showFlushbar(context, 'Ошибка.', 'Данные не сохранены.');
+      }
+    }
   }
 
   @override
@@ -183,13 +250,20 @@ class _AccountPageState extends State<AccountPage> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(15, 25, 15, 0),
-                  child: TextFieldCustom(
-                      controller: _phoneController,
-                      title: 'Ваш телефон',
-                      keyboardType: TextInputType.phone,
-                      needPhoneMask: true,
-                      needCodeMask: false,
-                      enabled: true),
+                  child: GestureDetector(
+                    onTap: () {
+                      context
+                          .nextPage(PhonePage())
+                          .then((value) => setUserData(provider));
+                    },
+                    child: TextFieldCustom(
+                        controller: _phoneController,
+                        title: 'Ваш телефон',
+                        keyboardType: TextInputType.phone,
+                        needPhoneMask: true,
+                        needCodeMask: false,
+                        enabled: false),
+                  ),
                 ),
               ),
               SliverToBoxAdapter(
@@ -295,9 +369,10 @@ class _AccountPageState extends State<AccountPage> {
                   _search = false;
                 });
               },
-              onSelect: (address) {
+              onSelect: (address, latLng) {
                 debugPrint(address);
                 setState(() {
+                  _latLng = latLng;
                   _search = false;
                   _addressController.text =
                       address.substring(0, 1).toUpperCase() +

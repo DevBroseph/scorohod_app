@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const String apiUrl = "https://server.scorohod.shop/user/";
+const String googleAPIKey = "AIzaSyC2enrbrduQm8Ku7fBqdP8gOKanBct4JkQ";
 
 const Color grey = Color(0xFFF7F5Fa);
 const Color red = Color(0xFFFE4539);
@@ -15,6 +16,39 @@ final List<BoxShadow> shadow = [
       blurRadius: 10,
       offset: const Offset(0, 5)),
 ];
+
+String getStatus(String status) {
+  switch (status) {
+    case 'new_order':
+      return 'Обработка заказа.';
+    case 'order_collect':
+      return 'Заказ собирается.';
+    case 'shop_ready':
+      return 'Заказ собран, ждём курьера.';
+    case 'courier_success':
+      return 'Курьер направляется к вам.';
+    case 'order_done':
+      return 'Заказ доставлен.';
+  }
+  return '';
+}
+
+int getIntStatus(String status) {
+  var newStatus = '';
+  switch (status) {
+    case 'new_order':
+      return 1;
+    case 'order_collect':
+      return 2;
+    case 'shop_ready':
+      return 3;
+    case 'courier_success':
+      return 4;
+    case 'order_done':
+      return 5;
+  }
+  return 1;
+}
 
 final lightTheme = ThemeData(
   brightness: Brightness.light,

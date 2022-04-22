@@ -36,13 +36,14 @@ class _ShopPageState extends State<ShopPage> {
   List<Product> _products = [];
 
   Future<void> _update() async {
+    var shop = Provider.of<DataProvider>(context).currentShop;
     var result = await NetHandler(context).getGroups();
     var products = await NetHandler(context).getProducts();
 
     _allGroups = result ?? [];
 
     for (var item in _allGroups) {
-      if (item.parentId == '0') {
+      if (item.shopId == shop.shopId && item.parentId == '0') {
         _perrentGroups.add(item);
       }
     }
@@ -110,7 +111,7 @@ class _ShopPageState extends State<ShopPage> {
                 ),
                 snap: false,
               ),
-              if (_allGroups.isNotEmpty)
+              if (_perrentGroups.isNotEmpty)
                 const SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(left: 15, top: 15),
@@ -150,7 +151,7 @@ class _ShopPageState extends State<ShopPage> {
                 ),
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: MediaQuery.of(context).padding.bottom + 100,
+                  height: MediaQuery.of(context).padding.bottom + 120,
                 ),
               ),
             ],
@@ -160,6 +161,13 @@ class _ShopPageState extends State<ShopPage> {
               child: OrderWidget(price: 12, color: _color),
               alignment: Alignment.bottomCenter,
             ),
+          if (_perrentGroups.isEmpty && !_allGroups.isEmpty)
+            const Center(
+              child: Text(
+                'К сожалению категорий пока нет(',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+              ),
+            )
         ],
       ),
     );

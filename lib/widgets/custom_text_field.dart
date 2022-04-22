@@ -38,31 +38,46 @@ class _SearchBarState extends State<TextFieldCustom> {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 10.0),
-          child: Text.rich(
-            TextSpan(
-              text: widget.title,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black,
-                height: 1.2,
-                fontFamily: 'SFUI',
-                fontWeight: FontWeight.w400,
-              ),
-              children: <TextSpan>[
-                if (widget.isRequired)
-                  const TextSpan(
-                    text: "*",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.red,
-                      height: 1.2,
-                      fontFamily: 'SFUI',
-                      fontWeight: FontWeight.w400,
-                    ),
+          child: Row(
+            children: [
+              Text.rich(
+                TextSpan(
+                  text: widget.title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                    height: 1.2,
+                    fontFamily: 'SFUI',
+                    fontWeight: FontWeight.w400,
                   ),
-              ],
-            ),
-            textAlign: TextAlign.center,
+                  children: [
+                    if (widget.isRequired)
+                      const TextSpan(
+                        text: "*",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.red,
+                          height: 1.2,
+                          fontFamily: 'SFUI',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (!widget.enabled &&
+                  widget.controller.text != '' &&
+                  widget.needPhoneMask)
+                Padding(
+                  padding: const EdgeInsets.only(left: 5),
+                  child: Icon(
+                    Icons.check_circle,
+                    size: 20,
+                    color: Colors.green[400],
+                  ),
+                ),
+            ],
           ),
         ),
         Container(
@@ -82,6 +97,7 @@ class _SearchBarState extends State<TextFieldCustom> {
                 : Colors.transparent,
           ),
           child: TextField(
+            textCapitalization: TextCapitalization.sentences,
             onChanged: (text) {
               if (text.length == 4 && widget.isCodeField) {
                 FocusScope.of(context).unfocus();

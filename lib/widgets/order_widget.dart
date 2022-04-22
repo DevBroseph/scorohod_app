@@ -46,7 +46,7 @@ class _State extends State<OrderWidget> {
               ),
             ),
             width: double.infinity,
-            height: 95 + MediaQuery.of(context).padding.bottom,
+            height: 110 + MediaQuery.of(context).padding.bottom,
             child: Column(
               children: [
                 ScaleButton(
@@ -106,9 +106,13 @@ class _State extends State<OrderWidget> {
                     ),
                   ),
                 ),
-                Align(
-                    alignment: Alignment.topCenter,
-                    child: Text('Минимальная сумма заказа: $shopMinSum₽'))
+                SafeArea(
+                  bottom: true,
+                  top: false,
+                  child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Text('Минимальная сумма заказа: $shopMinSum₽')),
+                )
               ],
             ),
           );

@@ -179,15 +179,4 @@ class OrderElementStatusCard extends StatelessWidget {
       ),
     );
   }
-
-  String getStatus(String status) {
-    var newStatus = '';
-    switch (status) {
-      case 'new_order':
-        return newStatus + 'Обработка заказа.';
-      case 'courier_success':
-        return newStatus + 'Курьер принял заказ';
-    }
-    return newStatus;
-  }
 }

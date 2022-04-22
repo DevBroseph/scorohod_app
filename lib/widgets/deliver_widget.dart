@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_state.dart';
 import 'package:scorohod_app/pages/order.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 
 class DeliverWidget extends StatefulWidget {
@@ -25,6 +27,7 @@ class DeliverWidget extends StatefulWidget {
 class _State extends State<DeliverWidget> {
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<DataProvider>(context);
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
         if (BlocProvider.of<OrdersBloc>(context).products.isEmpty) {
@@ -65,7 +68,7 @@ class _State extends State<DeliverWidget> {
                           ),
                         ),
                         Text(
-                          "${sum.toStringAsFixed(2)} ₽",
+                          "${(sum + double.parse(provider.currentShop.shopPriceDelivery)).toStringAsFixed(2)} ₽",
                           style: const TextStyle(
                             fontSize: 13,
                             color: Colors.white,

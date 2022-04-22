@@ -140,6 +140,24 @@ class _ShopCellState extends State<ShopCell> {
                   ],
                 ),
               ),
+              Container(
+                alignment: Alignment.bottomLeft,
+                // margin: EdgeInsets.only(left: 5, bottom: 5),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(0),
+                    topRight: Radius.circular(15),
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(19),
+                  ),
+                  child: Image.memory(
+                    base64Decode(widget.shop.shopLogo),
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.fitWidth,
+                  ),
+                ),
+              )
             ],
           ),
         ),

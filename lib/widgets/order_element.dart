@@ -12,15 +12,15 @@ class OrderElementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // margin: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
+      margin: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
       width: double.infinity,
       height: 110,
-      color: Colors.white,
-      // decoration: BoxDecoration(
-      //   boxShadow: shadow,
-      //   borderRadius: radius,
-      //   color: Colors.white,
-      // ),
+      // color: Colors.white,
+      decoration: BoxDecoration(
+        boxShadow: shadow,
+        borderRadius: radius,
+        color: Colors.white,
+      ),
       child: Stack(
         children: [
           Row(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -76,11 +76,11 @@ class OrderElementCard extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            width: double.infinity,
-            height: 1,
-            color: Colors.grey[200],
-          )
+          // Container(
+          //   width: double.infinity,
+          //   height: 1,
+          //   color: Colors.grey[200],
+          // )
         ],
       ),
     );

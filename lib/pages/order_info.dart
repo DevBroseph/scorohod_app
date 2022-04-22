@@ -1,7 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:linear_progress_bar/linear_progress_bar.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:scorohod_app/objects/coordinates.dart';
 import 'package:scorohod_app/objects/order.dart';
 import 'package:scorohod_app/objects/shop.dart';
+import 'package:scorohod_app/services/app_data.dart';
+import 'package:scorohod_app/services/constants.dart';
+import 'package:scorohod_app/services/directions_model.dart';
+import 'package:scorohod_app/services/directions_repository.dart';
+import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/order_element.dart';
 
 class OrderInfoPage extends StatefulWidget {
@@ -21,78 +33,275 @@ class OrderInfoPage extends StatefulWidget {
 }
 
 class _OrderInfoPageState extends State<OrderInfoPage> {
+  GoogleMapController? _mapController;
+
+  Coordinates? _courierCoordinates;
+
+  Marker? _courierMarker;
+  Marker? _userMarker;
+  Marker? _shopMarker;
+
+  BitmapDescriptor? _shopIcon;
+  BitmapDescriptor? _courierIcon;
+  BitmapDescriptor? _userIcon;
+
+  Directions? _info;
+
+  bool _mapInit = false;
+
+  void setMarks(DataProvider provider) async {
+    var userLatLng = LatLng(
+        widget.order.userLatLng.latitude, widget.order.userLatLng.longitude);
+    var shopLatLng = LatLng(
+        widget.shop.coordinates.latitude, widget.shop.coordinates.longitude);
+    setState(() {
+      _userMarker = Marker(
+        markerId: const MarkerId('userMarker'),
+        icon: _userIcon!,
+        position: userLatLng,
+      );
+      _shopMarker = Marker(
+        markerId: const MarkerId('shopMarker'),
+        icon: _shopIcon!,
+        position: shopLatLng,
+      );
+      _courierMarker = Marker(
+        markerId: const MarkerId('courierMarker'),
+        icon: _courierIcon!,
+        position: LatLng(
+            _courierCoordinates!.latitude, _courierCoordinates!.longitude),
+      );
+    });
+    final directions = await DirectionsRepository(dio: null)
+        .getDirections(origin: userLatLng, destination: shopLatLng);
+    setState(() => _info = directions);
+  }
+
+  @override
+  void dispose() {
+    if (_mapController != null) {
+      _mapController!.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _getCourierLocation();
+    _getIcons();
+    super.didChangeDependencies();
+  }
+
+  void _getIcons() {
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(devicePixelRatio: 3.2), 'assets/bag.png')
+        .then((d) {
+      setState(() {
+        _shopIcon = d;
+      });
+    });
+
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(devicePixelRatio: 3.2), 'assets/courier.png')
+        .then((d) {
+      setState(() {
+        _courierIcon = d;
+      });
+    });
+
+    BitmapDescriptor.fromAssetImage(
+            ImageConfiguration(devicePixelRatio: 3.2), 'assets/location.png')
+        .then((d) {
+      setState(() {
+        _userIcon = d;
+      });
+    });
+  }
+
+  void _getCourierLocation() async {
+    var result =
+        await NetHandler(context).getCourierLocation(widget.order.orderId);
+    print(result!.courierLocation.courierLocation.latitude);
+    setState(() {
+      _courierCoordinates = result.courierLocation.courierLocation;
+    });
+    // setMarks(Provider.of<DataProvider>(context, listen: false));
+  }
+
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<DataProvider>(context);
+    if (_userMarker == null &&
+        _shopMarker == null &&
+        _courierCoordinates != null) {
+      setMarks(provider);
+      // print(widget.order.userLatLng);
+    }
     return Scaffold(
-      body: CustomScrollView(physics: BouncingScrollPhysics(), slivers: [
-        SliverAppBar(
-          pinned: true,
-          // elevation: 0,
-          foregroundColor: widget.color,
-          // expandedHeight: 210,
-          title: Text(
-            'Ваш заказ',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: widget.color,
-            ),
-          ),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-              (context, index) =>
-                  OrderElementCard(orderElement: widget.order.products[index]),
-              childCount: widget.order.products.length),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 20),
-        ),
-        SliverToBoxAdapter(
-          child: Column(children: [
-            Text(
-              'Итого',
-              style: TextStyle(fontSize: 15, color: Colors.grey[600]),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Text(
-              widget.order.totalPrice + ' ₽',
-              style: TextStyle(
-                  color: Colors.grey[900],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22),
-            )
-          ]),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 20),
-        ),
-        SliverToBoxAdapter(
-          child: Column(children: [
-            _bottomCard('Номер заказа', widget.order.orderId, height: 70),
-            _bottomCard(
-              'Дата заказа',
-              DateFormat('dd.MM.yyyy в HH:mm').format(
-                DateTime.fromMillisecondsSinceEpoch(
-                    int.parse(widget.order.date) * 1000),
+      body: Stack(
+        children: [
+          if (_info != null)
+            CustomScrollView(slivers: [
+              SliverAppBar(
+                pinned: true,
+                // elevation: 0,
+                foregroundColor: widget.color,
+                // expandedHeight: 210,
+                title: Text(
+                  'Ваш заказ',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: widget.color,
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 15, top: 15),
+                  child: Text(
+                    getStatus(widget.order.status),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                      top: 10, bottom: 15, left: 15, right: 15),
+                  child: ClipRRect(
+                    borderRadius: radius,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: radius, boxShadow: shadow),
+                      child: LinearProgressBar(
+                        maxSteps: 5,
+                        progressType: LinearProgressBar.progressTypeLinear,
+                        currentStep: getIntStatus(widget.order.status),
+                        minHeight: 8,
+                        progressColor: red,
+                        dotsSpacing: EdgeInsets.all(20),
+                        backgroundColor: Colors.grey[200],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 15, right: 15, bottom: 15),
+                  child: ClipRRect(
+                    borderRadius: radius,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                          borderRadius: radius, boxShadow: shadow),
+                      child: Align(
+                        child: GoogleMap(
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                            initialCameraPosition: CameraPosition(
+                              target: getCenterLatLng(provider),
+                              zoom: 11.5,
+                            ),
+                            markers: {
+                              if (_userMarker != null) _userMarker!,
+                              if (_shopMarker != null) _shopMarker!,
+                              if (_courierMarker != null) _courierMarker!
+                            },
+                            polylines: {
+                              if (_info != null)
+                                Polyline(
+                                  polylineId: PolylineId('route'),
+                                  color: red,
+                                  width: 5,
+                                  points: _info!.polylinePoints
+                                      .map((e) =>
+                                          LatLng(e.latitude, e.longitude))
+                                      .toList(),
+                                )
+                            },
+                            onMapCreated: (controller) {
+                              _mapController = controller;
+                              _mapController!.animateCamera(
+                                  CameraUpdate.newLatLngBounds(
+                                      _info!.bounds, 50.0));
+                            }),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                    (context, index) => OrderElementCard(
+                        orderElement: widget.order.products[index]),
+                    childCount: widget.order.products.length),
+              ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 20),
+              ),
+              SliverToBoxAdapter(
+                child: Column(children: [
+                  Text(
+                    'Итого',
+                    style: TextStyle(fontSize: 15, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    widget.order.totalPrice + ' ₽',
+                    style: TextStyle(
+                        color: Colors.grey[900],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22),
+                  )
+                ]),
+              ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 20),
+              ),
+              SliverToBoxAdapter(
+                child: Column(children: [
+                  _bottomCard('Номер заказа', widget.order.orderId, height: 70),
+                  _bottomCard(
+                    'Дата заказа',
+                    DateFormat('dd.MM.yyyy в HH:mm').format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                          int.parse(widget.order.date) * 1000),
+                    ),
+                  ),
+                  _bottomCard(
+                    'Магазин',
+                    widget.shop.shopName,
+                  ),
+                  _bottomCard(
+                    'Адрес доставки',
+                    widget.order.address,
+                  ),
+                ]),
+              ),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 50),
+              ),
+            ]),
+          if (_info == null)
+            SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: Align(
+                alignment: Alignment.center,
+                child: LoadingAnimationWidget.inkDrop(
+                  color: Theme.of(context).primaryColor,
+                  size: 50,
+                ),
               ),
             ),
-            _bottomCard(
-              'Магазин',
-              widget.shop.shopName,
-            ),
-            _bottomCard(
-              'Адрес доставки',
-              widget.order.address,
-            ),
-          ]),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 50),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -117,5 +326,24 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
         ),
       ),
     );
+  }
+
+  LatLng getCenterLatLng(DataProvider provider) {
+    var userLatLng = LatLng(
+        widget.shop.coordinates.latitude, widget.shop.coordinates.longitude);
+    var shopLatLng =
+        LatLng(provider.user.latLng.latitude, provider.user.latLng.longitude);
+    var betweenPolylineLatLng = LatLng(
+        _info!.polylinePoints[_info!.polylinePoints.length ~/ 2].latitude,
+        _info!.polylinePoints[_info!.polylinePoints.length ~/ 2].longitude);
+    return LatLng(
+        (userLatLng.latitude +
+                shopLatLng.latitude +
+                betweenPolylineLatLng.latitude) /
+            3,
+        (userLatLng.longitude +
+                shopLatLng.longitude +
+                betweenPolylineLatLng.longitude) /
+            3);
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:scorohod_app/objects/coordinates.dart';
+
 List<Shop> shopsFromJson(String str) =>
     List<Shop>.from(json.decode(str).map((x) => Shop.fromJson(x)));
 
@@ -21,6 +23,8 @@ class Shop {
     required this.shopPriceDelivery,
     required this.shopWorkingHours,
     required this.shopStatus,
+    required this.shopAddress,
+    required this.coordinates,
   });
 
   String shopId;
@@ -32,19 +36,22 @@ class Shop {
   String shopPriceDelivery;
   String shopWorkingHours;
   String shopStatus;
+  String shopAddress;
+  Coordinates coordinates;
 
   factory Shop.fromJson(Map<String, dynamic> json) => Shop(
-        shopId: json["shop_id"],
-        shopName: json["shop_name"],
-        shopLogo: json["shop_logo"],
-        categoryId: json["category_id"],
-        shopDescription: json["shop_description"],
-        shopMinSum: json["shop_min_sum"],
-        shopPriceDelivery: json["shop_price_delivery"],
-        shopWorkingHours: json["shop_working_hours"],
+        shopId: json["shop_id"].toString(),
+        shopName: json["shop_name"].toString(),
+        shopLogo: json["shop_logo"].toString(),
+        categoryId: json["category_id"].toString(),
+        shopDescription: json["shop_description"].toString(),
+        shopMinSum: json["shop_min_sum"].toString(),
+        shopPriceDelivery: json["shop_price_delivery"].toString(),
+        shopWorkingHours: json["shop_working_hours"].toString(),
         shopStatus: json["shop_status"],
+        shopAddress: json['shop_address'] ?? '',
+        coordinates: coordinatesFromJson(json['shop_lat_lng']),
       );
-
   Map<String, dynamic> toJson() => {
         "shop_id": shopId,
         "shop_name": shopName,
@@ -55,5 +62,7 @@ class Shop {
         "shop_price_delivery": shopPriceDelivery,
         "shop_working_hours": shopWorkingHours,
         "shop_status": shopStatus,
+        "shop_address": shopAddress,
+        "shop_lat_lng": coordinatesToJson(coordinates),
       };
 }

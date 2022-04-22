@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
@@ -13,6 +15,7 @@ import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/pages/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
+import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/home_menu.dart';
@@ -36,11 +39,13 @@ class _HomePageState extends State<HomePage>
   List<Shop> _shops = [];
   List<Category> _categories = [];
 
+  var _scaffoldKey = GlobalKey<ScaffoldState>();
+
   Future<void> _update(DataProvider provider, OrdersBloc bloc) async {
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
     var result = await NetHandler(context).getShops();
     var categories = await NetHandler(context).getCategories();
-
+    print(provider.user.latLng);
     setAddress(provider);
 
     if (categories != null) {
@@ -116,6 +121,7 @@ class _HomePageState extends State<HomePage>
 
     return Scaffold(
       drawer: const HomeMenu(),
+      key: _scaffoldKey,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Stack(
@@ -127,6 +133,23 @@ class _HomePageState extends State<HomePage>
                   SliverAppBar(
                     pinned: true,
                     elevation: 0,
+                    leading: InkWell(
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      onTap: () {
+                        _scaffoldKey.currentState!.openDrawer();
+                      },
+                      child: Container(
+                        width: 35,
+                        height: 35,
+                        padding: EdgeInsets.all(18),
+                        child: SvgPicture.asset(
+                          'assets/menu.svg',
+                          color: Colors.black,
+                          height: 30,
+                          width: 30,
+                        ),
+                      ),
+                    ),
                     title: GestureDetector(
                       onTap: () {
                         setState(() {
@@ -214,9 +237,11 @@ class _HomePageState extends State<HomePage>
                     _search = false;
                   });
                 },
-                onSelect: (address) {
+                onSelect: (address, latLng) {
                   debugPrint(address);
                   setState(() {
+                    provider.setUserLatLng(latLng);
+                    provider.setUserAddress(address);
                     _search = false;
                     provider.user.address = address;
                   });

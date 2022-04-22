@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "471483842028",
+    "project_id": "scorohod-app",
+    "storage_bucket": "scorohod-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471483842028:android:46d21bc5acda95870594c9",
+        "android_client_info": {
+          "package_name": "ru.scorohod.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471483842028-3olmdp8cht6drga1qp1q0p5bh2lsqvqm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ru.scorohod.app",
+            "certificate_hash": "27d22dc37d255f414e5b3f27a7ad2c82437fdea5"
+          }
+        },
+        {
+          "client_id": "471483842028-685kl7qulvjcvlds0eht6to26rkv5r8q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_oSPhJD890_gn-2ob0RJN7kgRncc12cM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471483842028-685kl7qulvjcvlds0eht6to26rkv5r8q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "471483842028-pd48kf18emvd2lvjtuk5eeb2vogrko7r.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ru.scorohod.app.scorohodApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

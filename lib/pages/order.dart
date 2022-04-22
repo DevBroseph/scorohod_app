@@ -1,11 +1,15 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
 import 'package:scorohod_app/pages/order_info.dart';
+import 'package:scorohod_app/pages/phone.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/extensions.dart';
@@ -31,6 +35,8 @@ class _OrderPageState extends State<OrderPage> {
   final _roomController = TextEditingController();
   final _entranceController = TextEditingController();
   final _floorController = TextEditingController();
+
+  LatLng _latLng = LatLng(0, 0);
 
   String _selectedPayment = 'Наличные';
 
@@ -63,7 +69,11 @@ class _OrderPageState extends State<OrderPage> {
       setState(() {
         _addressController.text = 'Нажмите, чтобы выбрать адрес.';
         _nameController.text = '';
-        _phoneController.text = '';
+        if (provider.user.phone != '') {
+          _phoneController.text = provider.user.phone;
+        } else {
+          _phoneController.text = '';
+        }
         _roomController.text = '';
         _entranceController.text = '';
         _floorController.text = '';
@@ -77,8 +87,9 @@ class _OrderPageState extends State<OrderPage> {
       MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите имя.');
       return;
     }
-    if (_phoneController.text == '') {
-      MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите номер телефона.');
+    if (provider.user.phone == '') {
+      MyFlushbar.showFlushbar(
+          context, 'Ошибка.', 'Необходимо подтвердить номер телефона.');
       return;
     }
     if (_phoneController.text.length < 19) {
@@ -91,13 +102,17 @@ class _OrderPageState extends State<OrderPage> {
       MyFlushbar.showFlushbar(context, 'Скороход.', 'Укажите адрес доставки.');
       return;
     }
+    var fcmToken = await FirebaseMessaging.instance.getToken();
     var result = await NetHandler(context).createOrder(
         ordersBloc.products,
-        'test',
-        ordersBloc.totalPrice,
+        provider.user.id,
+        ordersBloc.totalPrice +
+            int.parse(provider.currentShop.shopPriceDelivery),
         provider.user.address,
+        provider.user.latLng,
         0.0,
-        provider.currentShop.shopId);
+        provider.currentShop.shopId,
+        fcmToken!);
 
     if (result != null) {
       widget.onTap;
@@ -229,14 +244,25 @@ class _OrderPageState extends State<OrderPage> {
                 child: Padding(
                   padding: const EdgeInsets.only(
                       bottom: 16.0, left: 15, right: 15, top: 10),
-                  child: TextFieldCustom(
-                    isRequired: true,
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    needCodeMask: false,
-                    title: "Номер телефона",
-                    needPhoneMask: true,
-                    enabled: true,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (provider.user.phone == '') {
+                        context
+                            .nextPage(const PhonePage())
+                            .then((value) => setUserData(provider));
+                      } else {
+                        MyFlushbar.showFlushbar(context, 'Внимание.',
+                            'Номер телефона можно изменить только в настройках.');
+                      }
+                    },
+                    child: TextFieldCustom(
+                        isRequired: false,
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        needCodeMask: false,
+                        title: "Номер телефона",
+                        needPhoneMask: true,
+                        enabled: false),
                   ),
                 ),
               ),
@@ -255,10 +281,12 @@ class _OrderPageState extends State<OrderPage> {
                   _search = false;
                 });
               },
-              onSelect: (address) {
+              onSelect: (address, latLng) {
                 debugPrint(address);
                 setState(() {
+                  _latLng = latLng;
                   _search = false;
+                  provider.setUserLatLng(latLng);
                   _addressController.text =
                       address.substring(0, 1).toUpperCase() +
                           address.substring(1, address.length);

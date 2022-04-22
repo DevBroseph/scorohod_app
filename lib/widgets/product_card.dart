@@ -63,9 +63,7 @@ class _ProductCardState extends State<ProductCard> {
         },
         child: Container(
           width: (MediaQuery.of(context).size.width - 48) / 2,
-          height: widget.item.name.length < 25
-              ? widget.width + 50
-              : widget.width + 80,
+          height: widget.width + 80,
           decoration: BoxDecoration(
             borderRadius: radius,
             boxShadow: shadow,

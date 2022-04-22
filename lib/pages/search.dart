@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 import 'package:scorohod_app/services/constants.dart';
 
@@ -13,7 +14,7 @@ class SearchPage extends StatefulWidget {
   }) : super(key: key);
 
   final Function() close;
-  final Function(String placeId) onSelect;
+  final Function(String placeId, LatLng latLng) onSelect;
 
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -45,7 +46,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    _googlePlace = GooglePlace("AIzaSyC2enrbrduQm8Ku7fBqdP8gOKanBct4JkQ");
+    _googlePlace = GooglePlace(googleAPIKey);
     _searchController.addListener(_searchPlace);
   }
 
@@ -85,15 +86,14 @@ class _SearchPageState extends State<SearchPage> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 return ListTile(
-                  leading: const Icon(
-                    Icons.pin_drop,
-                    color: red,
-                  ),
-                  title: Text(_predictions[index].description ?? ""),
-                  onTap: () => widget.onSelect(
-                    _predictions[index].description ?? "",
-                  ),
-                );
+                    leading: const Icon(
+                      Icons.pin_drop,
+                      color: red,
+                    ),
+                    title: Text(_predictions[index].description ?? ""),
+                    onTap: () {
+                      getPrediction(_predictions[index]);
+                    });
               },
               childCount: _predictions.length,
             ),
@@ -101,5 +101,20 @@ class _SearchPageState extends State<SearchPage> {
         ],
       ),
     );
+  }
+
+  void getPrediction(AutocompletePrediction? p) async {
+    if (p != null) {
+      var detail = await _googlePlace.details.get(p.placeId!);
+
+      var placeId = p.placeId;
+      double lat = detail!.result!.geometry!.location!.lat!;
+      double lng = detail.result!.geometry!.location!.lng!;
+
+      // var address = await Geocoder.local.findAddressesFromQuery(p.description);
+      widget.onSelect(p.description ?? '', LatLng(lat, lng));
+      print(lat);
+      print(lng);
+    }
   }
 }

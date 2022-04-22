@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:scorohod_app/objects/coordinates.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
+  String id;
   String name;
   String phone;
   String address;
   String room;
   String entrance;
   String floor;
+  LatLng latLng;
 
   User({
+    required this.id,
     required this.name,
     required this.phone,
     required this.address,
     required this.room,
     required this.entrance,
     required this.floor,
+    required this.latLng,
   });
 }
 
@@ -25,6 +31,7 @@ class AppData {
 
   final SharedPreferences _preferences;
 
+  final String _userId = "userId";
   final String _userName = "userName";
   final String _userPhone = "userPhone";
   final String _userAddress = "userAddress";
@@ -32,9 +39,20 @@ class AppData {
   final String _userEntrance = "userEntrance";
   final String _userFloor = "userFloor";
 
+  final String _userLatitude = "userLatitude";
+  final String _userLongitude = "userLongitude";
+
   static Future<AppData> getInstance() async {
     var shared = await SharedPreferences.getInstance();
     return AppData(shared);
+  }
+
+  String getUserId() {
+    return _preferences.getString(_userId) ?? "";
+  }
+
+  void setUserId(String value) {
+    _preferences.setString(_userId, value);
   }
 
   String getUserName() {
@@ -85,13 +103,32 @@ class AppData {
     _preferences.setString(_userFloor, value);
   }
 
+  double getUserLatitude() {
+    return _preferences.getDouble(_userLatitude) ?? 0.0;
+  }
+
+  void setUserLatitude(double value) {
+    _preferences.setDouble(_userLatitude, value);
+  }
+
+  double getUserLogitude() {
+    return _preferences.getDouble(_userLongitude) ?? 0.0;
+  }
+
+  void setUserLogitude(double value) {
+    _preferences.setDouble(_userLongitude, value);
+  }
+
   void setUser(User user) {
+    _preferences.setString(_userId, user.id);
     _preferences.setString(_userName, user.name);
     _preferences.setString(_userPhone, user.phone);
     _preferences.setString(_userAddress, user.address);
     _preferences.setString(_userRoom, user.floor);
     _preferences.setString(_userEntrance, user.entrance);
     _preferences.setString(_userFloor, user.floor);
+    _preferences.setDouble(_userLatitude, user.latLng.latitude);
+    _preferences.setDouble(_userLongitude, user.latLng.longitude);
   }
 
   void setEmptyUser() {
@@ -118,6 +155,8 @@ class ShopData {
   final String _shopPriceDelivery = "shopPriceDelivery";
   final String _shopWorkingHours = "shopWorkingHours";
   final String _shopStatus = "shopStatus";
+  final String _shopAddress = "shopAddress";
+  final String _shopLatLng = "shopLatLng";
 
   static Future<ShopData> getInstance() async {
     var shared = await SharedPreferences.getInstance();
@@ -196,6 +235,22 @@ class ShopData {
     _preferences.setString(_shopStatus, value);
   }
 
+  String getShopAddress() {
+    return _preferences.getString(_shopAddress) ?? '';
+  }
+
+  void setShopAddress(String value) {
+    _preferences.setString(_shopAddress, value);
+  }
+
+  String getShopLatLng() {
+    return _preferences.getString(_shopLatLng) ?? "";
+  }
+
+  void setShopLatLng(String value) {
+    _preferences.setString(_shopLatLng, value);
+  }
+
   void setShop(Shop shop) {
     _preferences.setString(_shopId, shop.shopId);
     _preferences.setString(_shopName, shop.shopName);
@@ -238,12 +293,15 @@ class DataProvider extends ChangeNotifier {
 
     return DataProvider(
       User(
+        id: userPrefs.getUserId(),
         name: userPrefs.getUserName(),
         phone: userPrefs.getUserPhone(),
         address: userPrefs.getUserAddress(),
         room: userPrefs.getUserRoom(),
         entrance: userPrefs.getUserEntrance(),
         floor: userPrefs.getUserFloor(),
+        latLng:
+            LatLng(userPrefs.getUserLatitude(), userPrefs.getUserLogitude()),
       ),
       Shop(
         categoryId: shopPrefs.getCategoryId(),
@@ -255,6 +313,8 @@ class DataProvider extends ChangeNotifier {
         shopPriceDelivery: shopPrefs.getPriceDelivery(),
         shopStatus: shopPrefs.getShopStatus(),
         shopWorkingHours: shopPrefs.getWorkingHours(),
+        shopAddress: shopPrefs.getShopAddress(),
+        coordinates: Coordinates(latitude: 0, longitude: 0),
       ),
     );
   }
@@ -342,15 +402,25 @@ class DataProvider extends ChangeNotifier {
     );
   }
 
+  void setUserLatLng(LatLng latLng) {
+    _user.latLng = latLng;
+    notifyListeners();
+    AppData.getInstance().then((value) {
+      value.setUserLatitude(latLng.latitude);
+      value.setUserLogitude(latLng.longitude);
+    });
+  }
+
   void signOutUser() {
     _user = User(
-      name: '',
-      phone: '',
-      address: '',
-      room: '',
-      entrance: '',
-      floor: '',
-    );
+        id: '',
+        name: '',
+        phone: '',
+        address: '',
+        room: '',
+        entrance: '',
+        floor: '',
+        latLng: LatLng(0, 0));
     notifyListeners();
 
     AppData.getInstance().then((value) => value.setEmptyUser());

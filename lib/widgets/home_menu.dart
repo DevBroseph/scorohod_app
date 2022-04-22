@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:scorohod_app/pages/about.dart';
 import 'package:scorohod_app/pages/account.dart';
+import 'package:scorohod_app/pages/delivery_info_page.dart';
 import 'package:scorohod_app/pages/orders.dart';
 import 'package:scorohod_app/services/constants.dart';
 
@@ -27,11 +30,21 @@ class HomeMenu extends StatelessWidget {
                 ),
               ),
               ListTile(
-                leading: const Icon(
-                  FontAwesomeIcons.userAlt,
+                leading: SvgPicture.asset(
+                  'assets/settings.svg',
                   color: red,
+                  height: 27,
+                  width: 27,
                 ),
-                title: const Text("Аккаунт"),
+                title: Text(
+                  "Аккаунт",
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    letterSpacing: 0.3,
+                  ),
+                ),
                 onTap: () {
                   Navigator.push(
                       context,
@@ -40,11 +53,21 @@ class HomeMenu extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(
-                  FontAwesomeIcons.coins,
+                leading: SvgPicture.asset(
+                  'assets/chat.svg',
                   color: red,
+                  height: 27,
+                  width: 27,
                 ),
-                title: const Text("Заказы"),
+                title: Text(
+                  "Заказы",
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    letterSpacing: 0.3,
+                  ),
+                ),
                 onTap: () {
                   Navigator.push(
                       context,
@@ -53,28 +76,56 @@ class HomeMenu extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(
-                  FontAwesomeIcons.wallet,
+                leading: SvgPicture.asset(
+                  'assets/card.svg',
                   color: red,
+                  height: 27,
+                  width: 27,
                 ),
-                title: const Text("Доставка и оплата"),
-                onTap: () {},
+                title: Text(
+                  "Доставка и оплата",
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DeliveryInfoPage()));
+                },
               ),
+              // ListTile(
+              //   leading: const Icon(
+              //     FontAwesomeIcons.solidQuestionCircle,
+              //     color: red,
+              //   ),
+              //   title: const Text("Служба поддержки"),
+              //   onTap: () {},
+              // ),
               ListTile(
-                leading: const Icon(
-                  FontAwesomeIcons.solidQuestionCircle,
+                leading: SvgPicture.asset(
+                  'assets/phone.svg',
                   color: red,
+                  height: 27,
+                  width: 27,
                 ),
-                title: const Text("Служба поддержки"),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(
-                  FontAwesomeIcons.infoCircle,
-                  color: red,
+                title: Text(
+                  "О сервисе",
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    letterSpacing: 0.3,
+                  ),
                 ),
-                title: const Text("О сервисе"),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AboutPage()));
+                },
               ),
             ],
           ),

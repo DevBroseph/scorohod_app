@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:scorohod_app/objects/category.dart';
+import 'package:scorohod_app/objects/coordinates.dart';
+import 'package:scorohod_app/objects/courier_location.dart';
 import 'package:scorohod_app/objects/error.dart';
 import 'package:scorohod_app/objects/group.dart';
+import 'package:scorohod_app/objects/info.dart';
 import 'package:scorohod_app/objects/order.dart';
 import 'package:scorohod_app/objects/order_element.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/objects/shop.dart';
+import 'package:scorohod_app/objects/user.dart' as object;
 import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
@@ -50,11 +55,11 @@ class NetHandler {
       case 200:
         return response.body;
       case 400:
-        context.showSnackBar(
-          SnackBar(
-            content: Text(answerErrorFromJson(response.body).message),
-          ),
-        );
+        // context.showSnackBar(
+        //   SnackBar(
+        //     content: Text(answerErrorFromJson(response.body).message),
+        //   ),
+        // );
         break;
       default:
         // context.changeMainPage(const NoInternet());
@@ -100,8 +105,16 @@ class NetHandler {
     return data != null ? productsFromJson(data) : null;
   }
 
-  Future<Order?> createOrder(List<OrderElement> orderElements, String clientId,
-      double price, String address, double discount, String shopId) async {
+  Future<Order?> createOrder(
+    List<OrderElement> orderElements,
+    String clientId,
+    double price,
+    String address,
+    LatLng userLatLng,
+    double discount,
+    String shopId,
+    String fcmToken,
+  ) async {
     var data = await _request(
       url: "order",
       params: {
@@ -110,12 +123,16 @@ class NetHandler {
         'total_price': price.toString(),
         'client_id': clientId,
         'address': address,
+        'user_lat_lng': coordinatesToJson(Coordinates(
+            latitude: userLatLng.latitude, longitude: userLatLng.longitude)),
         'discount': discount.toString(),
         'receipt_id': 'null',
         'shop_id': shopId,
+        'fcm_token': fcmToken,
       },
       method: Method.post,
     );
+    print(fcmToken);
     return data != null ? orderFromJson(data) : null;
   }
 
@@ -125,5 +142,80 @@ class NetHandler {
       method: Method.get,
     );
     return data != null ? ordersFromJson(data) : null;
+  }
+
+  Future<CourierLocation?> getCourierLocation(String orderId) async {
+    var data = await _request(
+      url: "order/0/$orderId",
+      method: Method.get,
+    );
+    // print(data);
+    return data != null ? courierLocationFromJson(data) : null;
+  }
+
+  Future<object.User?> auth(
+      String name,
+      String phone,
+      String token,
+      String uid,
+      String os,
+      String address,
+      String room,
+      String entrance,
+      String floor) async {
+    var data = await _request(
+      url: "auth",
+      params: {
+        'user_name': name,
+        'phone': phone,
+        'token': token,
+        'uid': uid,
+        'os': os,
+        'address': address,
+        'room': room,
+        'entrance': entrance,
+        'floor': floor,
+      },
+      method: Method.post,
+    );
+    return data != null ? object.userFromJson(data) : null;
+  }
+
+  Future<object.User?> updateUser(
+      String userId,
+      String name,
+      String phone,
+      String token,
+      String uid,
+      String os,
+      String address,
+      String room,
+      String entrance,
+      String floor) async {
+    var data = await _request(
+      url: "auth/$userId",
+      params: {
+        'user_name': name,
+        'phone': phone,
+        'token': token,
+        'uid': uid,
+        'os': os,
+        'address': address,
+        'room': room,
+        'entrance': entrance,
+        'floor': floor,
+      },
+      method: Method.put,
+    );
+    return data != null ? object.userFromJson(data) : null;
+  }
+
+  Future<Info?> getInfo() async {
+    var data = await _request(
+      url: "info",
+      method: Method.get,
+    );
+
+    return data != null ? infoFromJson(data) : null;
   }
 }

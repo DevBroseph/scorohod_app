@@ -262,8 +262,7 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                             ),
                           SliverToBoxAdapter(
                             child: SizedBox(
-                              height:
-                                  MediaQuery.of(context).padding.bottom * 11,
+                              height: 400,
                             ),
                           ),
                         ],
