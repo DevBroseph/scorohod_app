@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/product.dart';
@@ -41,9 +42,9 @@ class _State extends State<CategoryWidget> {
             padding: const EdgeInsets.only(top: 32, left: 15),
             child: Text(
               widget.category.name,
-              style: const TextStyle(
+              style: GoogleFonts.rubik(
                 fontSize: 19,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/pages/code.dart';
 import 'package:scorohod_app/services/constants.dart';
@@ -41,14 +42,15 @@ class _PhonePageState extends State<PhonePage> {
                   flex: 2,
                   child: Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 50, right: 50),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 50, right: 50),
                         child: Text(
                           'Чтобы совершать заказы, необходимо подтвердить номер телефона.',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w200,
-                              color: Colors.black,
-                              fontSize: 16),
+                          style: GoogleFonts.rubik(
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,
+                            fontSize: 16,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -91,13 +93,13 @@ class _PhonePageState extends State<PhonePage> {
                               color: red,
                             ),
                             height: 50,
-                            child: const Center(
+                            child: Center(
                                 child: Text(
                               'Далее',
-                              style: TextStyle(
+                              style: GoogleFonts.rubik(
                                   color: Colors.white,
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w600),
+                                  fontWeight: FontWeight.w500),
                             )),
                           ),
                         ),

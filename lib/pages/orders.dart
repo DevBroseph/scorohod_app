@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/objects/order.dart';
@@ -77,11 +78,11 @@ class _OrderStatusPageState extends State<OrderStatusPage> {
       appBar: AppBar(
         foregroundColor: red,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Ваши заказы',
-          style: TextStyle(
+          style: GoogleFonts.rubik(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500,
             color: red,
           ),
         ),
@@ -108,17 +109,32 @@ class _OrderStatusPageState extends State<OrderStatusPage> {
               height: MediaQuery.of(context).size.height,
               child: Align(
                 alignment: Alignment.center,
-                child: LoadingAnimationWidget.inkDrop(
+                child: LoadingAnimationWidget.horizontalRotatingDots(
                   color: Theme.of(context).primaryColor,
                   size: 50,
                 ),
               ),
             ),
           if (_empty)
-            const Padding(
+            Padding(
               padding: const EdgeInsets.only(bottom: 50),
               child: Center(
-                child: Text('Заказов пока не нет.'),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/empty-cart.png',
+                      width: 120,
+                      height: 120,
+                    ),
+                    const SizedBox(height: 40),
+                    Text(
+                      'Тут будут Ваши заказы.',
+                      style: GoogleFonts.rubik(
+                          fontSize: 16, fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ),
               ),
             )
         ],

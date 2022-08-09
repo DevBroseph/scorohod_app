@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
@@ -90,15 +91,15 @@ class _ProductCardState extends State<ProductCard> {
                             ? widget.item.name
                             : widget.item.name.substring(0, 50) + '...',
                         // widget.item.name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 14),
+                        style: GoogleFonts.rubik(
+                            fontWeight: FontWeight.w500, fontSize: 15),
                       ),
                       const SizedBox(
                         height: 5,
                       ),
                       Text(
                         widget.item.measure,
-                        style: const TextStyle(
+                        style: GoogleFonts.rubik(
                           color: Colors.grey,
                         ),
                       ),
@@ -118,10 +119,10 @@ class _ProductCardState extends State<ProductCard> {
                                         // .toStringAsFixed(2)
                                         .toString() +
                                     ' ₽',
-                                style: const TextStyle(
-                                    fontSize: 13,
+                                style: GoogleFonts.rubik(
+                                    fontSize: 14,
                                     color: Colors.black,
-                                    fontWeight: FontWeight.w600),
+                                    fontWeight: FontWeight.w400),
                               ),
                             ),
                             StreamBuilder<bool>(

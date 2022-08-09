@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
@@ -11,7 +13,7 @@ import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
 import 'package:scorohod_app/pages/order_info.dart';
 import 'package:scorohod_app/pages/phone.dart';
 import 'package:scorohod_app/pages/search.dart';
-import 'package:scorohod_app/services/app_data.dart';
+import 'package:scorohod_app/services/app_data.dart' as appData;
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/custom_text_field.dart';
@@ -36,6 +38,8 @@ class _OrderPageState extends State<OrderPage> {
   final _entranceController = TextEditingController();
   final _floorController = TextEditingController();
 
+  bool visibleButton = true;
+
   LatLng _latLng = LatLng(0, 0);
 
   String _selectedPayment = 'Наличные';
@@ -50,12 +54,12 @@ class _OrderPageState extends State<OrderPage> {
   ];
   List<String> _payment = ['Наличные', 'Картой'];
 
-  void setUserData(DataProvider provider) {
+  void setUserData(appData.DataProvider provider) {
     if (provider.hasUser) {
       setState(() {
         _nameController.text = provider.user.name;
         _phoneController.text = provider.user.phone;
-        if (provider.user.address.isNotEmpty) {
+        if (provider.user.address != '') {
           _addressController.text = provider.user.address;
         } else {
           _addressController.text = 'Нажмите, чтобы выбрать адрес.';
@@ -67,7 +71,11 @@ class _OrderPageState extends State<OrderPage> {
       });
     } else {
       setState(() {
-        _addressController.text = 'Нажмите, чтобы выбрать адрес.';
+        if (provider.user.address != '') {
+          _addressController.text = provider.user.address;
+        } else {
+          _addressController.text = 'Нажмите, чтобы выбрать адрес.';
+        }
         _nameController.text = '';
         if (provider.user.phone != '') {
           _phoneController.text = provider.user.phone;
@@ -82,7 +90,7 @@ class _OrderPageState extends State<OrderPage> {
     }
   }
 
-  void createOrder(OrdersBloc ordersBloc, DataProvider provider) async {
+  void createOrder(OrdersBloc ordersBloc, appData.DataProvider provider) async {
     if (_nameController.text == '') {
       MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите имя.');
       return;
@@ -102,19 +110,77 @@ class _OrderPageState extends State<OrderPage> {
       MyFlushbar.showFlushbar(context, 'Скороход.', 'Укажите адрес доставки.');
       return;
     }
-    var fcmToken = await FirebaseMessaging.instance.getToken();
-    var result = await NetHandler(context).createOrder(
-        ordersBloc.products,
-        provider.user.id,
-        ordersBloc.totalPrice +
-            int.parse(provider.currentShop.shopPriceDelivery),
-        provider.user.address,
-        provider.user.latLng,
-        0.0,
-        provider.currentShop.shopId,
-        fcmToken!);
+    if (provider.hasUser == false) {
+      if (provider.user.id == '') {
+        var result = await NetHandler(context).auth(
+            _nameController.text,
+            _phoneController.text,
+            '',
+            '',
+            Platform.isIOS ? 'Ios' : 'Android',
+            _addressController.text,
+            _roomController.text,
+            _entranceController.text,
+            _floorController.text);
 
-    if (result != null) {
+        if (result != null) {
+          provider.setUser(appData.User(
+            id: result.userId,
+            name: result.userName,
+            phone: result.phone,
+            address: provider.user.address,
+            room: result.room,
+            entrance: result.entrance,
+            floor: result.floor,
+            latLng: provider.user.latLng,
+          ));
+        }
+      } else {
+        var result = await NetHandler(context).updateUser(
+            provider.user.id,
+            _nameController.text,
+            _phoneController.text,
+            '',
+            '',
+            Platform.isIOS ? 'Ios' : 'Android',
+            _addressController.text,
+            _roomController.text,
+            _entranceController.text,
+            _floorController.text);
+
+        if (result != null) {
+          provider.setUser(appData.User(
+            id: result.userId,
+            name: result.userName,
+            phone: result.phone,
+            address: provider.user.address,
+            room: result.room,
+            entrance: result.entrance,
+            floor: result.floor,
+            latLng: provider.user.latLng,
+          ));
+        }
+      }
+    }
+    setState(() {
+      visibleButton = false;
+    });
+    var fcmToken = await FirebaseMessaging.instance.getToken();
+    var answer = await NetHandler(context).createOrder(
+      ordersBloc.products,
+      provider.user.id,
+      ordersBloc.totalPrice +
+          ordersBloc.deliveryPrice +
+          ordersBloc.servicePrice,
+      provider.user.address,
+      provider.user.latLng,
+      0.0,
+      provider.currentShop.shopId,
+      fcmToken!,
+      ordersBloc.city ? '0' : ordersBloc.distance,
+    );
+
+    if (answer != null) {
       widget.onTap;
       BlocProvider.of<OrdersBloc>(context).add(RemoveProducts());
       MyFlushbar.showFlushbar(context, 'Успешно.', 'Заказ оформлен.');
@@ -123,19 +189,22 @@ class _OrderPageState extends State<OrderPage> {
         context.nextPage(
             OrderInfoPage(
               color: widget.color,
-              order: result,
+              order: answer,
               shop: provider.currentShop,
             ),
             fullscreenDialog: true);
       });
     } else {
       MyFlushbar.showFlushbar(context, 'Ошибка.', 'Не удалось оформить заказ.');
+      setState(() {
+        visibleButton = true;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var provider = Provider.of<DataProvider>(context);
+    var provider = Provider.of<appData.DataProvider>(context);
     var bloc = BlocProvider.of<OrdersBloc>(context);
 
     if (!_loadData) {
@@ -155,9 +224,9 @@ class _OrderPageState extends State<OrderPage> {
                 // expandedHeight: 210,
                 title: Text(
                   'Оформление заказа',
-                  style: TextStyle(
+                  style: GoogleFonts.rubik(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: widget.color,
                   ),
                 ),
@@ -358,7 +427,7 @@ class _OrderPageState extends State<OrderPage> {
                             padding: const EdgeInsets.only(top: 12.0),
                             child: Text(
                               _payment[index],
-                              style: TextStyle(
+                              style: GoogleFonts.rubik(
                                 fontSize: 14,
                                 color:
                                     // Colors.white,
@@ -366,7 +435,6 @@ class _OrderPageState extends State<OrderPage> {
                                         ? Colors.white
                                         : Colors.black,
                                 height: 1.2,
-                                fontFamily: 'SFUI',
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

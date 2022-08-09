@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
@@ -65,16 +66,21 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
         icon: _shopIcon!,
         position: shopLatLng,
       );
-      _courierMarker = Marker(
-        markerId: const MarkerId('courierMarker'),
-        icon: _courierIcon!,
-        position: LatLng(
-            _courierCoordinates!.latitude, _courierCoordinates!.longitude),
-      );
+      if (_courierCoordinates != null) {
+        _courierMarker = Marker(
+          markerId: const MarkerId('courierMarker'),
+          icon: _courierIcon!,
+          position: LatLng(
+              _courierCoordinates!.latitude, _courierCoordinates!.longitude),
+        );
+      }
     });
     final directions = await DirectionsRepository(dio: null)
         .getDirections(origin: userLatLng, destination: shopLatLng);
-    setState(() => _info = directions);
+    setState(() {
+      _info = directions;
+      _mapInit = true;
+    });
   }
 
   @override
@@ -94,7 +100,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
 
   void _getIcons() {
     BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(devicePixelRatio: 3.2), 'assets/bag.png')
+            const ImageConfiguration(devicePixelRatio: 3.2), 'assets/bag.png')
         .then((d) {
       setState(() {
         _shopIcon = d;
@@ -102,7 +108,8 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     });
 
     BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(devicePixelRatio: 3.2), 'assets/courier.png')
+            const ImageConfiguration(devicePixelRatio: 3.2),
+            'assets/courier.png')
         .then((d) {
       setState(() {
         _courierIcon = d;
@@ -110,7 +117,8 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     });
 
     BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(devicePixelRatio: 3.2), 'assets/location.png')
+            const ImageConfiguration(devicePixelRatio: 3.2),
+            'assets/location.png')
         .then((d) {
       setState(() {
         _userIcon = d;
@@ -121,11 +129,12 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
   void _getCourierLocation() async {
     var result =
         await NetHandler(context).getCourierLocation(widget.order.orderId);
-    print(result!.courierLocation.courierLocation.latitude);
-    setState(() {
-      _courierCoordinates = result.courierLocation.courierLocation;
-    });
-    // setMarks(Provider.of<DataProvider>(context, listen: false));
+    if (result != null && result.courierLocation != null) {
+      setState(() {
+        _courierCoordinates = result.courierLocation!.courierLocation;
+      });
+    }
+    setMarks(Provider.of<DataProvider>(context, listen: false));
   }
 
   @override
@@ -133,7 +142,9 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     var provider = Provider.of<DataProvider>(context);
     if (_userMarker == null &&
         _shopMarker == null &&
-        _courierCoordinates != null) {
+        _courierIcon != null &&
+        _shopIcon != null &&
+        _userIcon != null) {
       setMarks(provider);
       // print(widget.order.userLatLng);
     }
@@ -149,9 +160,9 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                 // expandedHeight: 210,
                 title: Text(
                   'Ваш заказ',
-                  style: TextStyle(
+                  style: GoogleFonts.rubik(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w400,
                     color: widget.color,
                   ),
                 ),
@@ -161,8 +172,8 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                   padding: const EdgeInsets.only(left: 15, top: 15),
                   child: Text(
                     getStatus(widget.order.status),
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.rubik(
+                        fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
@@ -213,7 +224,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                               if (_courierMarker != null) _courierMarker!
                             },
                             polylines: {
-                              if (_info != null)
+                              if (_info != null && _mapInit)
                                 Polyline(
                                   polylineId: PolylineId('route'),
                                   color: red,
@@ -248,16 +259,18 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                 child: Column(children: [
                   Text(
                     'Итого',
-                    style: TextStyle(fontSize: 15, color: Colors.grey[600]),
+                    style: GoogleFonts.rubik(
+                        fontSize: 15, color: Colors.grey[500]),
                   ),
                   const SizedBox(
                     height: 5,
                   ),
                   Text(
-                    widget.order.totalPrice + ' ₽',
-                    style: TextStyle(
+                    double.parse(widget.order.totalPrice).toStringAsFixed(2) +
+                        ' ₽',
+                    style: GoogleFonts.rubik(
                         color: Colors.grey[900],
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                         fontSize: 22),
                   )
                 ]),
@@ -294,7 +307,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
               height: MediaQuery.of(context).size.height,
               child: Align(
                 alignment: Alignment.center,
-                child: LoadingAnimationWidget.inkDrop(
+                child: LoadingAnimationWidget.horizontalRotatingDots(
                   color: Theme.of(context).primaryColor,
                   size: 50,
                 ),
@@ -311,7 +324,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
       child: ListTile(
         title: Text(
           title,
-          style: TextStyle(
+          style: GoogleFonts.rubik(
               color: Colors.grey[500],
               fontWeight: FontWeight.w500,
               fontSize: 15),
@@ -320,7 +333,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
           padding: const EdgeInsets.only(top: 10),
           child: Text(
             subtitle,
-            style: const TextStyle(
+            style: GoogleFonts.rubik(
                 color: Colors.black, fontWeight: FontWeight.w500, fontSize: 15),
           ),
         ),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_state.dart';
 import 'package:scorohod_app/objects/group.dart';
@@ -54,7 +55,7 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
     for (var itemGroup in widget.groups) {
       if (itemGroup.parentId == widget.perrent.id) {
         for (var item in widget.products) {
-          if (item.groupId == itemGroup.id) {
+          if (item.groupId == itemGroup.id && item.archive != '1') {
             _perrentProducts.add(item);
           }
         }
@@ -188,10 +189,10 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                             foregroundColor: widget.color,
                             title: Text(
                               widget.perrent.name,
-                              style: TextStyle(
+                              style: GoogleFonts.rubik(
                                   fontSize: 16,
                                   color: widget.color,
-                                  fontWeight: FontWeight.w600),
+                                  fontWeight: FontWeight.w500),
                             ),
                             snap: false,
                             actions: [
@@ -214,7 +215,7 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                               backgroundColor:
                                   Theme.of(context).appBarTheme.backgroundColor,
                               shadowColor: Colors.black.withOpacity(0.3),
-                              toolbarHeight: Platform.isIOS ? 5 : 30,
+                              toolbarHeight: 30,
                               flexibleSpace: TabBar(
                                 isScrollable: true,
                                 controller: _tabController,
@@ -240,6 +241,7 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                                     ),
                                     child: Text(
                                       e.name,
+                                      style: GoogleFonts.rubik(),
                                     ),
                                   );
                                 }).toList(),

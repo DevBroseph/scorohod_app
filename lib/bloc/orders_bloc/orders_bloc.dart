@@ -5,7 +5,11 @@ import 'package:scorohod_app/objects/order_element.dart';
 class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
   List<OrderElement> products = [];
   double totalPrice = 0;
+  double deliveryPrice = 0;
+  int servicePrice = 0;
   int orderId = 0;
+  String distance = '';
+  bool city = false;
 
   OrdersBloc() : super(OrderIdle());
 
@@ -36,6 +40,20 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       for (var element in products) {
         totalPrice += element.price;
       }
+
+      yield OrderIdle();
+    }
+
+    if (event is AddDeliveryPrice) {
+      yield OrderLoading();
+
+      // if (deliveryPrice == 0 && servicePrice == 0) {
+      deliveryPrice = event.price;
+      servicePrice = event.servicePrice;
+      // }
+
+      city = event.city;
+      distance = event.distance;
 
       yield OrderIdle();
     }
@@ -105,6 +123,9 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       yield OrderLoading();
 
       products = [];
+
+      deliveryPrice = 0;
+      servicePrice = 0;
 
       totalPrice = 0;
 

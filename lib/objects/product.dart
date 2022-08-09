@@ -21,6 +21,7 @@ class Product {
     required this.manufacturer,
     required this.terms,
     required this.price,
+    required this.archive,
   });
 
   String nomenclatureId;
@@ -34,6 +35,7 @@ class Product {
   String manufacturer;
   String terms;
   double price;
+  String archive;
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         nomenclatureId: json["nomenclature_id"] ?? '',
@@ -49,6 +51,7 @@ class Product {
         price: (int.tryParse(json['price'].toString()) ??
                 double.parse(json['price'].toString()))
             .toDouble(),
+        archive: json["archive"] ?? '',
       );
 
   Map<String, dynamic> toJson() => {

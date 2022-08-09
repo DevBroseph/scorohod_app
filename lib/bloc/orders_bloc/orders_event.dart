@@ -16,6 +16,20 @@ class EditProduct extends OrdersEvent {
   EditProduct({required this.orderElement, required this.index});
 }
 
+class AddDeliveryPrice extends OrdersEvent {
+  final double price;
+  final int servicePrice;
+  final bool city;
+  final String distance;
+
+  AddDeliveryPrice({
+    required this.price,
+    required this.servicePrice,
+    required this.city,
+    required this.distance,
+  });
+}
+
 class RemoveProductFromBasketPage extends OrdersEvent {
   final OrderElement orderElement;
 

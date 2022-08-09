@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 const String apiUrl = "https://server.scorohod.shop/user/";
 const String googleAPIKey = "AIzaSyC2enrbrduQm8Ku7fBqdP8gOKanBct4JkQ";
 
-const Color grey = Color(0xFFF7F5Fa);
+const Color grey = Color.fromARGB(255, 247, 245, 250);
 const Color red = Color(0xFFFE4539);
 
 const BorderRadius radius = BorderRadius.all(
@@ -18,19 +18,20 @@ final List<BoxShadow> shadow = [
 ];
 
 String getStatus(String status) {
+  var newStatus = '';
   switch (status) {
     case 'new_order':
-      return 'Обработка заказа.';
-    case 'order_collect':
-      return 'Заказ собирается.';
-    case 'shop_ready':
-      return 'Заказ собран, ждём курьера.';
-    case 'courier_success':
-      return 'Курьер направляется к вам.';
+      return 'Новый заказ.';
+    case 'manager_accept':
+      return 'Заказ принят, собирается.';
+    case 'manager_done':
+      return 'Заказ собран, ожидает курьера.';
+    case 'courier_accept':
+      return ' Курьер забрал заказ.';
     case 'order_done':
       return 'Заказ доставлен.';
   }
-  return '';
+  return newStatus;
 }
 
 int getIntStatus(String status) {
@@ -54,7 +55,7 @@ final lightTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: red,
   backgroundColor: Colors.white,
-  scaffoldBackgroundColor: Color(0xFFFBFBFB),
+  scaffoldBackgroundColor: Color.fromRGBO(251, 251, 251, 1),
   cardColor: Colors.grey[100],
   bottomNavigationBarTheme: const BottomNavigationBarThemeData(
     backgroundColor: Colors.white,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/objects/order.dart';
@@ -111,8 +112,8 @@ class OrderElementStatusCard extends StatelessWidget {
                           getStatus(order.status),
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
+                          style: GoogleFonts.rubik(
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -124,7 +125,7 @@ class OrderElementStatusCard extends StatelessWidget {
                           DateTime.fromMillisecondsSinceEpoch(
                               int.parse(order.date) * 1000),
                         ),
-                        style: TextStyle(
+                        style: GoogleFonts.rubik(
                           fontWeight: FontWeight.w500,
                           color: Colors.grey[500],
                         ),
@@ -159,9 +160,9 @@ class OrderElementStatusCard extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.only(right: 15, bottom: 15),
                     child: Text(
-                      order.totalPrice + ' ₽',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
+                      double.parse(order.totalPrice).toStringAsFixed(2) + ' ₽',
+                      style: GoogleFonts.rubik(
+                        fontWeight: FontWeight.w400,
                         color: Colors.grey[500],
                       ),
                     ),

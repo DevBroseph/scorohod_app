@@ -124,7 +124,7 @@ class AppData {
     _preferences.setString(_userName, user.name);
     _preferences.setString(_userPhone, user.phone);
     _preferences.setString(_userAddress, user.address);
-    _preferences.setString(_userRoom, user.floor);
+    _preferences.setString(_userRoom, user.room);
     _preferences.setString(_userEntrance, user.entrance);
     _preferences.setString(_userFloor, user.floor);
     _preferences.setDouble(_userLatitude, user.latLng.latitude);
@@ -157,6 +157,8 @@ class ShopData {
   final String _shopStatus = "shopStatus";
   final String _shopAddress = "shopAddress";
   final String _shopLatLng = "shopLatLng";
+  final String _city = "shopAddress";
+  final String _cityLatLng = "shopLatLng";
 
   static Future<ShopData> getInstance() async {
     var shared = await SharedPreferences.getInstance();
@@ -251,6 +253,22 @@ class ShopData {
     _preferences.setString(_shopLatLng, value);
   }
 
+  String getCity() {
+    return _preferences.getString(_city) ?? '';
+  }
+
+  void setCity(String value) {
+    _preferences.setString(_city, value);
+  }
+
+  String getCityLatLng() {
+    return _preferences.getString(_cityLatLng) ?? "";
+  }
+
+  void setCityLatLng(String value) {
+    _preferences.setString(_cityLatLng, value);
+  }
+
   void setShop(Shop shop) {
     _preferences.setString(_shopId, shop.shopId);
     _preferences.setString(_shopName, shop.shopName);
@@ -315,6 +333,8 @@ class DataProvider extends ChangeNotifier {
         shopWorkingHours: shopPrefs.getWorkingHours(),
         shopAddress: shopPrefs.getShopAddress(),
         coordinates: Coordinates(latitude: 0, longitude: 0),
+        city: shopPrefs.getCity(),
+        cityCoordinates: Coordinates(latitude: 0, longitude: 0),
       ),
     );
   }

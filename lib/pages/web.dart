@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:webviewx/webviewx.dart';
 
@@ -23,9 +24,9 @@ class _WebPageState extends State<WebPage> {
         // expandedHeight: 210,
         title: Text(
           widget.title,
-          style: const TextStyle(
+          style: GoogleFonts.rubik(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w500,
             color: red,
           ),
         ),

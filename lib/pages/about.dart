@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scorohod_app/objects/info.dart';
 import 'package:scorohod_app/pages/web.dart';
@@ -54,16 +55,16 @@ class _AboutPageState extends State<AboutPage> {
       body: Stack(
         children: [
           CustomScrollView(slivers: [
-            const SliverAppBar(
+            SliverAppBar(
               pinned: true,
               // elevation: 0,
               foregroundColor: red,
               // expandedHeight: 210,
               title: Text(
                 'О сервисе',
-                style: TextStyle(
+                style: GoogleFonts.rubik(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                   color: red,
                 ),
               ),
@@ -81,15 +82,15 @@ class _AboutPageState extends State<AboutPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     'Версия приложения: ',
-                    style: TextStyle(
+                    style: GoogleFonts.rubik(
                       color: Colors.black,
                     ),
                   ),
                   Text(
                     _appVersion,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.rubik(fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -99,15 +100,15 @@ class _AboutPageState extends State<AboutPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     'Сборка: ',
-                    style: TextStyle(
+                    style: GoogleFonts.rubik(
                       color: Colors.black,
                     ),
                   ),
                   Text(
                     _buildVersion,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.rubik(fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -127,13 +128,16 @@ class _AboutPageState extends State<AboutPage> {
               alignment: Alignment.bottomCenter,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(
+                children: [
+                  const Icon(
                     FontAwesomeIcons.copyright,
                     size: 15,
                   ),
-                  SizedBox(width: 5),
-                  Text('2022 Скороход')
+                  const SizedBox(width: 5),
+                  Text(
+                    '2022 Скороход',
+                    style: GoogleFonts.rubik(),
+                  )
                 ],
               ),
             ),
@@ -167,7 +171,7 @@ class _AboutPageState extends State<AboutPage> {
               child: ListTile(
                 title: Text(
                   title,
-                  style: const TextStyle(
+                  style: GoogleFonts.rubik(
                       color: Colors.black, fontWeight: FontWeight.w400),
                 ),
                 trailing: const Icon(

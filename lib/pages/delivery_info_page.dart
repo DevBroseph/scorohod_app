@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scorohod_app/objects/info.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/network.dart';
@@ -34,14 +35,14 @@ class _DeliveryInfoPageState extends State<DeliveryInfoPage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
+          SliverAppBar(
             pinned: true,
             // elevation: 0,
             foregroundColor: red,
             // expandedHeight: 210,
             title: Text(
               '',
-              style: TextStyle(
+              style: GoogleFonts.rubik(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: red,
@@ -85,18 +86,18 @@ class _DeliveryInfoPageState extends State<DeliveryInfoPage> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
           Text(
             title,
-            style: TextStyle(
-                fontSize: main ? 22 : 12,
+            style: GoogleFonts.rubik(
+                fontSize: main ? 22 : 14,
                 fontWeight: main ? FontWeight.bold : FontWeight.w500,
-                color: main ? Colors.black : Colors.grey[600]),
+                color: main ? Colors.black : Colors.grey[500]),
           ),
           SizedBox(height: main ? 30 : 5),
           if (subTitle != '')
             Text(
               subTitle,
-              style: const TextStyle(
+              style: GoogleFonts.rubik(
                   color: Colors.black,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                   fontSize: 15),
               textAlign: TextAlign.center,
             )

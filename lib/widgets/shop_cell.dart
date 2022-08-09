@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:scale_button/scale_button.dart';
@@ -105,9 +106,9 @@ class _ShopCellState extends State<ShopCell> {
                     FittedBox(
                       child: Text(
                         widget.shop.shopName,
-                        style: const TextStyle(
+                        style: GoogleFonts.rubik(
                           fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
@@ -118,9 +119,9 @@ class _ShopCellState extends State<ShopCell> {
                     FittedBox(
                       child: Text(
                         widget.shop.shopWorkingHours,
-                        style: const TextStyle(
+                        style: GoogleFonts.rubik(
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
@@ -131,7 +132,7 @@ class _ShopCellState extends State<ShopCell> {
                     FittedBox(
                       child: Text(
                         "от ${widget.shop.shopMinSum} ₽",
-                        style: const TextStyle(
+                        style: GoogleFonts.rubik(
                           fontSize: 16,
                           color: Colors.white,
                         ),
@@ -154,7 +155,7 @@ class _ShopCellState extends State<ShopCell> {
                     base64Decode(widget.shop.shopLogo),
                     width: 50,
                     height: 50,
-                    fit: BoxFit.fitWidth,
+                    fit: BoxFit.cover,
                   ),
                 ),
               )

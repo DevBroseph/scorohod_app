@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
@@ -51,18 +52,23 @@ class _State extends State<OrderWidget> {
               children: [
                 ScaleButton(
                   onTap: () {
-                    if (sum < int.parse(shopMinSum)) {
-                      MyFlushbar.showFlushbar(
-                          context, 'Ошибка.', 'Недостаточная сумма.');
-                    } else {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) => BasketPage(
-                            color: widget.color,
+                    if (provider.user.address != '') {
+                      if (sum < int.parse(shopMinSum)) {
+                        MyFlushbar.showFlushbar(
+                            context, 'Ошибка.', 'Недостаточная сумма.');
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (context) => BasketPage(
+                              color: widget.color,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
+                    } else {
+                      MyFlushbar.showFlushbar(context, 'Внимание.',
+                          'Необходимо указать адрес доставки.');
                     }
                   },
                   duration: const Duration(milliseconds: 150),
@@ -82,24 +88,22 @@ class _State extends State<OrderWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "В корзину",
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: GoogleFonts.rubik(
+                            fontSize: 14,
                             color: Colors.white,
                             height: 1.2,
-                            fontFamily: 'SFUI',
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
-                          "${(sum + int.parse(provider.currentShop.shopPriceDelivery)).toStringAsFixed(2)} ₽",
-                          style: const TextStyle(
-                            fontSize: 13,
+                          "${sum.toStringAsFixed(2)} ₽",
+                          style: GoogleFonts.rubik(
+                            fontSize: 14,
                             color: Colors.white,
                             height: 1.2,
-                            fontFamily: 'SFUI',
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -111,7 +115,13 @@ class _State extends State<OrderWidget> {
                   top: false,
                   child: Align(
                       alignment: Alignment.topCenter,
-                      child: Text('Минимальная сумма заказа: $shopMinSum₽')),
+                      child: Text(
+                        'Минимальная сумма заказа: $shopMinSum₽',
+                        style: GoogleFonts.rubik(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )),
                 )
               ],
             ),

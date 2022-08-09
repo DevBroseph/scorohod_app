@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scorohod_app/pages/about.dart';
 import 'package:scorohod_app/pages/account.dart';
 import 'package:scorohod_app/pages/delivery_info_page.dart';
@@ -38,10 +39,10 @@ class HomeMenu extends StatelessWidget {
                 ),
                 title: Text(
                   "Аккаунт",
-                  style: TextStyle(
+                  style: GoogleFonts.rubik(
                     color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15,
                     letterSpacing: 0.3,
                   ),
                 ),
@@ -61,10 +62,10 @@ class HomeMenu extends StatelessWidget {
                 ),
                 title: Text(
                   "Заказы",
-                  style: TextStyle(
+                  style: GoogleFonts.rubik(
                     color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15,
                     letterSpacing: 0.3,
                   ),
                 ),
@@ -84,10 +85,10 @@ class HomeMenu extends StatelessWidget {
                 ),
                 title: Text(
                   "Доставка и оплата",
-                  style: TextStyle(
+                  style: GoogleFonts.rubik(
                     color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15,
                     letterSpacing: 0.3,
                   ),
                 ),
@@ -115,10 +116,10 @@ class HomeMenu extends StatelessWidget {
                 ),
                 title: Text(
                   "О сервисе",
-                  style: TextStyle(
+                  style: GoogleFonts.rubik(
                     color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15,
                     letterSpacing: 0.3,
                   ),
                 ),

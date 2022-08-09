@@ -4,6 +4,7 @@ import 'package:http/http.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/coordinates.dart';
 import 'package:scorohod_app/objects/courier_location.dart';
+import 'package:scorohod_app/objects/delivery.dart';
 import 'package:scorohod_app/objects/error.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/info.dart';
@@ -114,6 +115,7 @@ class NetHandler {
     double discount,
     String shopId,
     String fcmToken,
+    String city,
   ) async {
     var data = await _request(
       url: "order",
@@ -129,6 +131,7 @@ class NetHandler {
         'receipt_id': 'null',
         'shop_id': shopId,
         'fcm_token': fcmToken,
+        'city': city,
       },
       method: Method.post,
     );
@@ -149,7 +152,6 @@ class NetHandler {
       url: "order/0/$orderId",
       method: Method.get,
     );
-    // print(data);
     return data != null ? courierLocationFromJson(data) : null;
   }
 
@@ -210,6 +212,20 @@ class NetHandler {
     return data != null ? object.userFromJson(data) : null;
   }
 
+  Future<object.User?> getUser(String phone) async {
+    print(phone);
+    var data = await _request(
+      url: "auth/$phone",
+      method: Method.get,
+    );
+    print(data);
+    try {
+      return data != null ? object.userFromJson(data) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<Info?> getInfo() async {
     var data = await _request(
       url: "info",
@@ -217,5 +233,16 @@ class NetHandler {
     );
 
     return data != null ? infoFromJson(data) : null;
+  }
+
+  Future<DeliveryInfo?> getDeliveryInfo() async {
+    var data = await _request(
+      url: "delivery",
+      method: Method.get,
+    );
+
+    print(data);
+
+    return data != null ? deliveryInfoFromJson(data) : null;
   }
 }

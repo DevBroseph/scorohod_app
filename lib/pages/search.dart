@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 import 'package:scorohod_app/services/constants.dart';
@@ -90,7 +91,11 @@ class _SearchPageState extends State<SearchPage> {
                       Icons.pin_drop,
                       color: red,
                     ),
-                    title: Text(_predictions[index].description ?? ""),
+                    title: Text(
+                      _predictions[index].description ?? "",
+                      style: GoogleFonts.rubik(
+                          fontWeight: FontWeight.w400, fontSize: 17),
+                    ),
                     onTap: () {
                       getPrediction(_predictions[index]);
                     });

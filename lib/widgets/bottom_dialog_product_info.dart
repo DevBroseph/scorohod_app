@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
@@ -88,12 +89,11 @@ class _State extends State<ProductInfoBottomDialog> {
                       padding: const EdgeInsets.only(right: 20, left: 20),
                       child: Text(
                         widget.product.name,
-                        style: const TextStyle(
+                        style: GoogleFonts.rubik(
                           fontSize: 22,
                           color: Colors.black,
                           height: 1.2,
-                          fontFamily: 'SFUI',
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -133,13 +133,14 @@ class _State extends State<ProductInfoBottomDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(left: 15, top: 15),
                                 child: Text(
                                   'Описание',
-                                  style: TextStyle(
+                                  style: GoogleFonts.rubik(
                                       color: Colors.black,
-                                      fontWeight: FontWeight.bold),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500),
                                 ),
                               ),
                               if (widget.product.description.isNotEmpty)
@@ -149,11 +150,10 @@ class _State extends State<ProductInfoBottomDialog> {
                                   child: Text(
                                     widget.product.description,
                                     textAlign: TextAlign.start,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 15,
                                       color: Colors.black,
                                       height: 1.5,
-                                      fontFamily: 'SFUI',
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
@@ -164,13 +164,14 @@ class _State extends State<ProductInfoBottomDialog> {
                                 color: Colors.grey[700],
                                 margin: const EdgeInsets.all(15),
                               ),
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(left: 15),
                                 child: Text(
-                                  'Вес',
-                                  style: TextStyle(
+                                  'Единица измерения',
+                                  style: GoogleFonts.rubik(
                                       color: Colors.black,
-                                      fontWeight: FontWeight.bold),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500),
                                 ),
                               ),
                               if (widget.product.manufacturer.isNotEmpty)
@@ -180,11 +181,10 @@ class _State extends State<ProductInfoBottomDialog> {
                                   child: Text(
                                     widget.product.measure,
                                     textAlign: TextAlign.start,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 15,
                                       color: Colors.black,
                                       height: 1.5,
-                                      fontFamily: 'SFUI',
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
@@ -195,13 +195,14 @@ class _State extends State<ProductInfoBottomDialog> {
                                 color: Colors.grey[700],
                                 margin: const EdgeInsets.all(15),
                               ),
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(left: 15),
                                 child: Text(
                                   'Производитель',
-                                  style: TextStyle(
+                                  style: GoogleFonts.rubik(
                                       color: Colors.black,
-                                      fontWeight: FontWeight.bold),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500),
                                 ),
                               ),
                               if (widget.product.manufacturer.isNotEmpty)
@@ -211,11 +212,10 @@ class _State extends State<ProductInfoBottomDialog> {
                                   child: Text(
                                     widget.product.manufacturer,
                                     textAlign: TextAlign.start,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 15,
                                       color: Colors.black,
                                       height: 1.5,
-                                      fontFamily: 'SFUI',
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
@@ -226,13 +226,14 @@ class _State extends State<ProductInfoBottomDialog> {
                                 color: Colors.grey[700],
                                 margin: const EdgeInsets.all(15),
                               ),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 15),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 15),
                                 child: Text(
                                   'Срок годности и условие хранения',
-                                  style: TextStyle(
+                                  style: GoogleFonts.rubik(
                                       color: Colors.black,
-                                      fontWeight: FontWeight.bold),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500),
                                 ),
                               ),
                               if (widget.product.terms.isNotEmpty)
@@ -242,11 +243,10 @@ class _State extends State<ProductInfoBottomDialog> {
                                   child: Text(
                                     widget.product.terms,
                                     textAlign: TextAlign.start,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 15,
                                       color: Colors.black,
                                       height: 1.5,
-                                      fontFamily: 'SFUI',
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
@@ -316,10 +316,9 @@ class _State extends State<ProductInfoBottomDialog> {
                                         AsyncSnapshot<int> snapshop) {
                                       return Text(
                                         snapshop.data.toString(),
-                                        style: const TextStyle(
+                                        style: GoogleFonts.rubik(
                                           fontSize: 18,
                                           height: 1.2,
-                                          fontFamily: 'SFUI',
                                           fontWeight: FontWeight.w500,
                                         ),
                                       );
@@ -402,16 +401,16 @@ class _State extends State<ProductInfoBottomDialog> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text(
+                                Text(
                                   "Добавить ",
                                   textAlign: TextAlign.center,
                                   overflow: TextOverflow.ellipsis,
                                   softWrap: true,
-                                  style: TextStyle(
-                                    fontSize: 13,
+                                  style: GoogleFonts.rubik(
+                                    fontSize: 15,
                                     color: Colors.white,
                                     height: 1.2,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 const SizedBox(
@@ -430,11 +429,11 @@ class _State extends State<ProductInfoBottomDialog> {
                                   textAlign: TextAlign.center,
                                   overflow: TextOverflow.ellipsis,
                                   softWrap: true,
-                                  style: const TextStyle(
-                                    fontSize: 13,
+                                  style: GoogleFonts.rubik(
+                                    fontSize: 14,
                                     color: Colors.white,
                                     height: 1.2,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 )
                               ],

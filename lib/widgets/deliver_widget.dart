@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
@@ -33,7 +34,7 @@ class _State extends State<DeliverWidget> {
         if (BlocProvider.of<OrdersBloc>(context).products.isEmpty) {
           return Container();
         } else {
-          double sum = BlocProvider.of<OrdersBloc>(context).totalPrice;
+          var bloc = BlocProvider.of<OrdersBloc>(context);
 
           return Container(
             width: double.infinity,
@@ -57,24 +58,22 @@ class _State extends State<DeliverWidget> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Оформить заказ",
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: GoogleFonts.rubik(
+                            fontSize: 14,
                             color: Colors.white,
                             height: 1.2,
-                            fontFamily: 'SFUI',
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
-                          "${(sum + double.parse(provider.currentShop.shopPriceDelivery)).toStringAsFixed(2)} ₽",
-                          style: const TextStyle(
-                            fontSize: 13,
+                          "${(bloc.totalPrice + bloc.deliveryPrice).toStringAsFixed(2)} ₽",
+                          style: GoogleFonts.rubik(
+                            fontSize: 14,
                             color: Colors.white,
                             height: 1.2,
-                            fontFamily: 'SFUI',
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],

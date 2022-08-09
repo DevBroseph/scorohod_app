@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
@@ -161,8 +162,8 @@ class _HomePageState extends State<HomePage>
                         child: Text(
                           _address,
                           textAlign: TextAlign.left,
-                          style: TextStyle(
-                            color: Colors.grey[700],
+                          style: GoogleFonts.rubik(
+                            color: Colors.grey[600],
                             fontSize: 16,
                           ),
                         ),
@@ -189,9 +190,9 @@ class _HomePageState extends State<HomePage>
                                       padding: EdgeInsets.all(15),
                                       child: Text(
                                         _categories[index].categoryName,
-                                        style: const TextStyle(
+                                        style: GoogleFonts.rubik(
                                           fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                         textAlign: TextAlign.left,
                                       ),
@@ -252,7 +253,7 @@ class _HomePageState extends State<HomePage>
                 height: MediaQuery.of(context).size.height,
                 child: Align(
                   alignment: Alignment.center,
-                  child: LoadingAnimationWidget.inkDrop(
+                  child: LoadingAnimationWidget.horizontalRotatingDots(
                     color: Theme.of(context).primaryColor,
                     size: 50,
                   ),

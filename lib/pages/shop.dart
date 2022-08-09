@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/objects/group.dart';
@@ -92,7 +93,7 @@ class _ShopPageState extends State<ShopPage> {
               height: MediaQuery.of(context).size.height,
               child: Align(
                 alignment: Alignment.center,
-                child: LoadingAnimationWidget.inkDrop(
+                child: LoadingAnimationWidget.horizontalRotatingDots(
                   color: _color,
                   size: 50,
                 ),
@@ -106,19 +107,19 @@ class _ShopPageState extends State<ShopPage> {
                 foregroundColor: _color,
                 title: Text(
                   shop.currentShop.shopName,
-                  style: TextStyle(
-                      fontSize: 18, color: _color, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.rubik(
+                      fontSize: 18, color: _color, fontWeight: FontWeight.w500),
                 ),
                 snap: false,
               ),
               if (_perrentGroups.isNotEmpty)
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.only(left: 15, top: 15),
+                    padding: const EdgeInsets.only(left: 15, top: 15),
                     child: Text(
                       'Категории',
-                      style:
-                          TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+                      style: GoogleFonts.rubik(
+                          fontSize: 21, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
@@ -162,10 +163,25 @@ class _ShopPageState extends State<ShopPage> {
               alignment: Alignment.bottomCenter,
             ),
           if (_perrentGroups.isEmpty && !_allGroups.isEmpty)
-            const Center(
-              child: Text(
-                'К сожалению категорий пока нет(',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/empty-cart.png',
+                    width: 120,
+                    height: 120,
+                  ),
+                  const SizedBox(height: 40),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 40, left: 40),
+                    child: Text(
+                      'К сожалению категорий пока нет(',
+                      style: GoogleFonts.rubik(
+                          fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
               ),
             )
         ],

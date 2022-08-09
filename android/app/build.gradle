@@ -39,7 +39,7 @@ android {
         applicationId "ru.scorohod.app"
         minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
+        versionCode 4
         versionName flutterVersionName
         multiDexEnabled true
     }

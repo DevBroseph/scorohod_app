@@ -20,18 +20,19 @@ class CourierLocation {
   });
 
   Order order;
-  CourierLocationClass courierLocation;
+  CourierLocationClass? courierLocation;
 
   factory CourierLocation.fromJson(Map<String, dynamic> json) =>
       CourierLocation(
         order: Order.fromJson(json["order"]),
-        courierLocation:
-            CourierLocationClass.fromJson(json["courier_location"]),
+        courierLocation: json["courier_location"] != null
+            ? CourierLocationClass.fromJson(json["courier_location"])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
         "order": order.toJson(),
-        "courier_location": courierLocation.toJson(),
+        "courier_location": courierLocation?.toJson(),
       };
 }
 
@@ -40,11 +41,13 @@ class CourierLocationClass {
     required this.courierLocation,
   });
 
-  Coordinates courierLocation;
+  Coordinates? courierLocation;
 
   factory CourierLocationClass.fromJson(Map<String, dynamic> json) =>
       CourierLocationClass(
-        courierLocation: coordinatesFromJson(json['courier_location']),
+        courierLocation: json['courier_location'] != null
+            ? coordinatesFromJson(json['courier_location'])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {

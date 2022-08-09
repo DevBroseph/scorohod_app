@@ -1,13 +1,11 @@
+import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-
-import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/pages/phone.dart';
@@ -28,7 +26,8 @@ class AccountPage extends StatefulWidget {
   State<AccountPage> createState() => _AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _AccountPageState extends State<AccountPage>
+    with AutomaticKeepAliveClientMixin<AccountPage> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
@@ -59,7 +58,11 @@ class _AccountPageState extends State<AccountPage> {
       });
     } else {
       setState(() {
-        _addressController.text = 'Нажмите, чтобы выбрать адрес.';
+        if (provider.user.address.isNotEmpty) {
+          _addressController.text = provider.user.address;
+        } else {
+          _addressController.text = 'Нажмите, чтобы выбрать адрес.';
+        }
         _nameController.text = '';
         if (provider.user.phone != '') {
           _phoneController.text = provider.user.phone;
@@ -72,6 +75,12 @@ class _AccountPageState extends State<AccountPage> {
         _loadData = true;
       });
     }
+  }
+
+  void setUserPhone(DataProvider provider) {
+    setState(() {
+      _phoneController.text = provider.user.phone;
+    });
   }
 
   void showAlert(DataProvider provider) async {
@@ -123,18 +132,20 @@ class _AccountPageState extends State<AccountPage> {
     print(provider.hasUser);
     if (provider.user.id == '') {
       var result = await NetHandler(context).auth(
-          _nameController.text,
-          _phoneController.text,
-          '',
-          '',
-          Platform.isIOS ? 'Ios' : 'Android',
-          _addressController.text,
-          _roomController.text,
-          _entranceController.text,
-          _floorController.text);
+        _nameController.text,
+        _phoneController.text,
+        '',
+        '',
+        Platform.isIOS ? 'Ios' : 'Android',
+        _addressController.text,
+        _roomController.text,
+        _entranceController.text,
+        _floorController.text,
+      );
 
       if (result != null) {
-        provider.setUser(User(
+        provider.setUser(
+          User(
             id: result.userId,
             name: result.userName,
             phone: result.phone,
@@ -142,23 +153,26 @@ class _AccountPageState extends State<AccountPage> {
             room: result.room,
             entrance: result.entrance,
             floor: result.floor,
-            latLng: _latLng));
+            latLng: _latLng,
+          ),
+        );
         MyFlushbar.showFlushbar(context, 'Успешно.', 'Данные были сохранены.');
       } else {
         MyFlushbar.showFlushbar(context, 'Ошибка.', 'Данные не сохранены.');
       }
     } else {
       var result = await NetHandler(context).updateUser(
-          provider.user.id,
-          _nameController.text,
-          _phoneController.text,
-          '',
-          '',
-          Platform.isIOS ? 'Ios' : 'Android',
-          _addressController.text,
-          _roomController.text,
-          _entranceController.text,
-          _floorController.text);
+        provider.user.id,
+        _nameController.text,
+        _phoneController.text,
+        '',
+        '',
+        Platform.isIOS ? 'Ios' : 'Android',
+        _addressController.text,
+        _roomController.text,
+        _entranceController.text,
+        _floorController.text,
+      );
 
       if (result != null) {
         provider.setUser(User(
@@ -171,10 +185,25 @@ class _AccountPageState extends State<AccountPage> {
             floor: result.floor,
             latLng: _latLng));
         MyFlushbar.showFlushbar(context, 'Успешно.', 'Данные были сохранены.');
+        Timer(Duration(seconds: 3), () {
+          Navigator.pop(context);
+        });
       } else {
         MyFlushbar.showFlushbar(context, 'Ошибка.', 'Данные не сохранены.');
       }
     }
+  }
+
+  @override
+  void initState() {
+    print('init');
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    print('dispose');
+    super.dispose();
   }
 
   @override
@@ -196,11 +225,11 @@ class _AccountPageState extends State<AccountPage> {
                 // elevation: 0,
                 foregroundColor: red,
                 // expandedHeight: 210,
-                title: const Text(
+                title: Text(
                   'Аккаунт',
-                  style: TextStyle(
+                  style: GoogleFonts.rubik(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                     color: red,
                   ),
                 ),
@@ -239,12 +268,13 @@ class _AccountPageState extends State<AccountPage> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(15, 30, 15, 0),
                   child: TextFieldCustom(
-                      controller: _nameController,
-                      title: 'Ваше имя',
-                      keyboardType: TextInputType.text,
-                      needPhoneMask: false,
-                      needCodeMask: false,
-                      enabled: true),
+                    controller: _nameController,
+                    title: 'Ваше имя',
+                    keyboardType: TextInputType.text,
+                    needPhoneMask: false,
+                    needCodeMask: false,
+                    enabled: true,
+                  ),
                 ),
               ),
               SliverToBoxAdapter(
@@ -253,8 +283,8 @@ class _AccountPageState extends State<AccountPage> {
                   child: GestureDetector(
                     onTap: () {
                       context
-                          .nextPage(PhonePage())
-                          .then((value) => setUserData(provider));
+                          .nextPage(const PhonePage())
+                          .then((value) => setUserPhone(provider));
                     },
                     child: TextFieldCustom(
                         controller: _phoneController,
@@ -342,15 +372,14 @@ class _AccountPageState extends State<AccountPage> {
                       boxShadow: shadow,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: const Center(
+                    child: Center(
                       child: Text(
                         "Сохранить",
-                        style: TextStyle(
+                        style: GoogleFonts.rubik(
                           fontSize: 15,
                           color: Colors.white,
                           height: 1.2,
-                          fontFamily: 'SFUI',
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -374,6 +403,9 @@ class _AccountPageState extends State<AccountPage> {
                 setState(() {
                   _latLng = latLng;
                   _search = false;
+                  provider.setUserLatLng(latLng);
+                  provider.setUserAddress(address);
+                  provider.user.address = address;
                   _addressController.text =
                       address.substring(0, 1).toUpperCase() +
                           address.substring(1, address.length);
@@ -384,4 +416,7 @@ class _AccountPageState extends State<AccountPage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

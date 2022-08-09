@@ -33,6 +33,7 @@ dependencies:
   http: ^0.13.3  
   flutter_bloc: ^7.0.1
   provider: ^6.0.1
+  geocoder2: ^1.1.0
   shared_preferences: ^2.0.11
   overlay_support: ^1.2.1
   easy_mask: 2.0.1
@@ -46,7 +47,6 @@ dependencies:
   modal_bottom_sheet: ^2.0.0
   zoom_pinch_overlay: ^1.1.2
   loading_animation_widget:
-  flutter_hooks: ^0.18.2+1
   another_flushbar: ^1.10.28
   flutter_platform_alert: ^0.2.2
   intl: ^0.17.0
@@ -65,6 +65,7 @@ dependencies:
   url_launcher: ^6.0.20
   webviewx: ^0.2.1
   flutter_svg: ^1.0.3
+  google_fonts: ^3.0.1
 
 
 dev_dependencies:

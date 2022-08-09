@@ -25,6 +25,8 @@ class Shop {
     required this.shopStatus,
     required this.shopAddress,
     required this.coordinates,
+    required this.city,
+    required this.cityCoordinates,
   });
 
   String shopId;
@@ -38,6 +40,8 @@ class Shop {
   String shopStatus;
   String shopAddress;
   Coordinates coordinates;
+  String city;
+  Coordinates cityCoordinates;
 
   factory Shop.fromJson(Map<String, dynamic> json) => Shop(
         shopId: json["shop_id"].toString(),
@@ -51,6 +55,8 @@ class Shop {
         shopStatus: json["shop_status"],
         shopAddress: json['shop_address'] ?? '',
         coordinates: coordinatesFromJson(json['shop_lat_lng']),
+        city: json['city'] ?? '',
+        cityCoordinates: coordinatesFromJson(json['city_lat_lng']),
       );
   Map<String, dynamic> toJson() => {
         "shop_id": shopId,
@@ -64,5 +70,7 @@ class Shop {
         "shop_status": shopStatus,
         "shop_address": shopAddress,
         "shop_lat_lng": coordinatesToJson(coordinates),
+        "city": shopAddress,
+        "cityCoordinates": coordinatesToJson(cityCoordinates),
       };
 }

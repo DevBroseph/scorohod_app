@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/product.dart';
@@ -54,44 +55,58 @@ class GroupCard extends StatelessWidget {
           color: Colors.white,
         ),
         height: 150.0,
-        child: Stack(
-          children: [
-            if (_perrentGroups[index].groupImage != '')
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Stack(
+            children: [
+              if (_perrentGroups[index].groupImage != '')
+                Positioned(
+                  bottom: -20.0,
+                  left: -20.0,
+                  // right: -15.0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        // left: 9,
+                        // bottom: 9,
+                        // right: 9,
+                        // top: 9,
+                        ),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Opacity(
+                        opacity: 0.8,
+                        child: Image.memory(
+                          base64Decode(
+                            _perrentGroups[index].groupImage,
+                          ),
+                          fit: BoxFit.scaleDown,
+                          width: 80,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.only(
-                  left: 9,
-                  bottom: 9,
-                  right: 9,
+                  left: 5,
                   top: 9,
+                  right: 5,
                 ),
                 child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Image.memory(
-                    base64Decode(
-                      _perrentGroups[index].groupImage,
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    group.name,
+                    style: GoogleFonts.rubik(
+                      fontSize: 14,
                     ),
-                    fit: BoxFit.scaleDown,
-                    width: group.name.length > 23 ? 45 : 55,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    textAlign: TextAlign.right,
                   ),
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 9,
-                bottom: 9,
-                right: 9,
-              ),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  group.name,
-                  style: const TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

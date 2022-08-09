@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:scorohod_app/objects/order_element.dart';
 
 import '../services/constants.dart';
@@ -59,7 +60,7 @@ class OrderElementCard extends StatelessWidget {
                     ),
                     Text(
                       orderElement.weight,
-                      style: TextStyle(color: Colors.grey[500]),
+                      style: GoogleFonts.rubik(color: Colors.grey[500]),
                     ),
                   ],
                 ),
@@ -72,7 +73,7 @@ class OrderElementCard extends StatelessWidget {
               padding: const EdgeInsets.only(right: 15, bottom: 15),
               child: Text(
                 '${orderElement.quantity} шт, ${orderElement.price} ₽',
-                style: const TextStyle(fontWeight: FontWeight.w400),
+                style: GoogleFonts.rubik(fontWeight: FontWeight.w400),
               ),
             ),
           ),
