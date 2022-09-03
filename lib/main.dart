@@ -11,6 +11,8 @@ import 'package:scorohod_app/pages/home.dart';
 import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 
+import 'services/app_data.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
