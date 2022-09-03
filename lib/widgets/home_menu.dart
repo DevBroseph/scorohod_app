@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:scorohod_app/objects/city_coordinates.dart';
 import 'package:scorohod_app/pages/about.dart';
 import 'package:scorohod_app/pages/account.dart';
 import 'package:scorohod_app/objects/coordinates.dart';
@@ -20,15 +21,19 @@ class HomeMenu extends StatefulWidget {
 }
 
 class HomeMenuState extends State<HomeMenu> {
-
   double _height = 50.0;
   double _opacity = 0.0;
   int _rotation = 0;
   String city = '';
   bool isListVisible = false;
-  List<Coordinates> result = [];
-  final list = ['Москва', 'Москва', 'Москва', 'Москва', 'Москва', ];
-
+  List<CityCoordinates> result = [];
+  final list = [
+    'Москва',
+    'Москва',
+    'Москва',
+    'Москва',
+    'Москва',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -153,18 +158,18 @@ class HomeMenuState extends State<HomeMenu> {
                   print(answer);
                   if (answer != null) {
                     result = answer;
-                    print(answer[1].latitude);
+                    print(answer[1].coordinates.latitude);
                   }
-                  print(result[1].latitude);
+                  print(result[1].coordinates.longitude);
                   setState(() {
-                    if (_height == MediaQuery.of(context).size.height-500) {
+                    if (_height == MediaQuery.of(context).size.height - 500) {
                       setState(() {
                         _height = 50;
                         _rotation = 0;
                       });
-                    }  else {
+                    } else {
                       setState(() {
-                        _height = MediaQuery.of(context).size.height-500;
+                        _height = MediaQuery.of(context).size.height - 500;
                         _rotation = 180;
                       });
                     }
@@ -177,15 +182,14 @@ class HomeMenuState extends State<HomeMenu> {
                     setState(() {
                       if (_opacity == 1.0) {
                         _opacity = 0.0;
-                      }  else  {
+                      } else {
                         _opacity = 1.0;
                       }
                     });
                   },
                   decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(20)
-                  ),
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(20)),
                   child: Column(
                     children: [
                       Container(
@@ -195,17 +199,23 @@ class HomeMenuState extends State<HomeMenu> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(city == '' ? 'Выбор города' : city,
+                              Text(
+                                city == '' ? 'Выбор города' : city,
                                 style: GoogleFonts.rubik(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w400,
                                   fontSize: 15,
                                   letterSpacing: 0.3,
-                                ),),
+                                ),
+                              ),
                               AnimatedRotation(
                                 turns: _rotation / 360,
                                 duration: const Duration(milliseconds: 200),
-                                child: SvgPicture.asset('assets/triangle.svg', color: Colors.white, height: 20,),
+                                child: SvgPicture.asset(
+                                  'assets/triangle.svg',
+                                  color: Colors.white,
+                                  height: 20,
+                                ),
                               ),
                             ],
                           ),
@@ -213,16 +223,19 @@ class HomeMenuState extends State<HomeMenu> {
                       ),
                       Expanded(
                         child: Padding(
-                          padding: EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.only(bottom: 20),
                           child: ListView.builder(
                             itemCount: 4,
                             itemBuilder: (BuildContext context, int index) {
                               return Padding(
-                                padding: EdgeInsets.only(bottom: 10),
+                                padding: const EdgeInsets.only(bottom: 10),
                                 child: GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      city = result[index].latitude.toString();
+                                      city = result[index]
+                                          .coordinates
+                                          .latitude
+                                          .toString();
                                       _height = 50;
                                       _rotation = 0;
                                     });
@@ -232,11 +245,21 @@ class HomeMenuState extends State<HomeMenu> {
                                     alignment: Alignment.centerLeft,
                                     decoration: BoxDecoration(
                                       color: Colors.white12,
-                                      borderRadius: BorderRadius.circular(10)
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Padding(
-                                      padding: EdgeInsets.only(left: 10),
-                                      child: Text(city == '' ? result[index].latitude.toString() : city,
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        city == ''
+                                            ? result[index]
+                                                    .coordinates
+                                                    .longitude
+                                                    .toString() +
+                                                result[index]
+                                                    .coordinates
+                                                    .longitude
+                                                    .toString()
+                                            : city,
                                         style: GoogleFonts.rubik(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w400,
@@ -244,7 +267,7 @@ class HomeMenuState extends State<HomeMenu> {
                                           letterSpacing: 0.3,
                                         ),
                                       ),
-                                    )
+                                    ),
                                   ),
                                 ),
                               );

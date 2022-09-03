@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:scorohod_app/objects/category.dart';
+import 'package:scorohod_app/objects/city_coordinates.dart';
 import 'package:scorohod_app/objects/coordinates.dart';
 import 'package:scorohod_app/objects/courier_location.dart';
 import 'package:scorohod_app/objects/delivery.dart';
@@ -88,13 +89,11 @@ class NetHandler {
     return data != null ? shopsFromJson(data) : null;
   }
 
-  Future<List<Coordinates>?> getCoordinates() async {
-    var data = await _request(
-        url: "coordinates",
-        method: Method.get
-    );
+  Future<List<CityCoordinates>?> getCoordinates() async {
+    var data = await _request(url: "coordinates", method: Method.get);
+    print(data);
 
-    return data != null ? listOfCoordinatesFromJson(data) : null;
+    return data != null ? cityCoordinatesFromJson(data) : null;
   }
 
   Future<List<Group>?> getGroups() async {
