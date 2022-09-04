@@ -3,14 +3,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:scorohod_app/objects/city_coordinates.dart';
+import 'package:scorohod_app/services/app_data.dart' as appData;
 import 'package:scorohod_app/pages/about.dart';
 import 'package:scorohod_app/pages/account.dart';
-import 'package:scorohod_app/objects/coordinates.dart';
+import 'package:yandex_geocoder/yandex_geocoder.dart';
 import 'package:scorohod_app/pages/delivery_info_page.dart';
 import 'package:scorohod_app/pages/orders.dart';
 import 'package:scorohod_app/services/constants.dart';
 
+import '../pages/choose_city.dart';
+import '../services/app_data.dart';
 import '../services/network.dart';
 
 class HomeMenu extends StatefulWidget {
@@ -24,19 +28,15 @@ class HomeMenuState extends State<HomeMenu> {
   double _height = 50.0;
   double _opacity = 0.0;
   int _rotation = 0;
-  String city = '';
   bool isListVisible = false;
-  List<CityCoordinates> result = [];
-  final list = [
-    'Москва',
-    'Москва',
-    'Москва',
-    'Москва',
-    'Москва',
-  ];
+  List<String> result = [];
+  late String userCity;
+
+  final YandexGeocoder geo = YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
 
   @override
   Widget build(BuildContext context) {
+    var city = Provider.of<appData.DataProvider>(context);
     return SizedBox(
       width: MediaQuery.of(context).size.width / 1.5,
       child: Drawer(
@@ -153,14 +153,69 @@ class HomeMenuState extends State<HomeMenu> {
                 },
               ),
               GestureDetector(
-                onTap: () async {
-                  var answer = await NetHandler(context).getCoordinates();
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const ChooseCity()));
+                },
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          city.city.nameRU == '' ? 'Выбор города' : city.city.nameRU,
+                          style: GoogleFonts.rubik(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 15,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        RotationTransition(
+                          turns: const AlwaysStoppedAnimation(90 / 360),
+                          child: SvgPicture.asset(
+                            'assets/triangle.svg',
+                            color: Colors.white,
+                            height: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+/*
+var answer = await NetHandler(context).getCoordinates();
                   print(answer);
                   if (answer != null) {
-                    result = answer;
-                    print(answer[1].coordinates.latitude);
+                    for (int i = answer.length-1; i>0; i--){
+                      var answersCity = await geo.getGeocode(GeocodeRequest(
+                          geocode: PointGeocode(
+                              latitude: answer[i].coordinates.latitude,
+                              longitude: answer[i].coordinates.longitude)
+                      ));
+                      var city = answersCity.firstAddress?.formatted;
+                      List<String>? listCityInfo = city?.split(', ');
+                      if (!result.contains(listCityInfo![2])) {
+                        setState(() {
+                          result.add(listCityInfo[2]);
+                        });
+                      }
+                    }
                   }
-                  print(result[1].coordinates.longitude);
                   setState(() {
                     if (_height == MediaQuery.of(context).size.height - 500) {
                       setState(() {
@@ -174,115 +229,4 @@ class HomeMenuState extends State<HomeMenu> {
                       });
                     }
                   });
-                },
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 200),
-                  height: _height,
-                  onEnd: () {
-                    setState(() {
-                      if (_opacity == 1.0) {
-                        _opacity = 0.0;
-                      } else {
-                        _opacity = 1.0;
-                      }
-                    });
-                  },
-                  decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 50,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                city == '' ? 'Выбор города' : city,
-                                style: GoogleFonts.rubik(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 15,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                              AnimatedRotation(
-                                turns: _rotation / 360,
-                                duration: const Duration(milliseconds: 200),
-                                child: SvgPicture.asset(
-                                  'assets/triangle.svg',
-                                  color: Colors.white,
-                                  height: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: ListView.builder(
-                            itemCount: 4,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      city = result[index]
-                                          .coordinates
-                                          .latitude
-                                          .toString();
-                                      _height = 50;
-                                      _rotation = 0;
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 40,
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white12,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 10),
-                                      child: Text(
-                                        city == ''
-                                            ? result[index]
-                                                    .coordinates
-                                                    .longitude
-                                                    .toString() +
-                                                result[index]
-                                                    .coordinates
-                                                    .longitude
-                                                    .toString()
-                                            : city,
-                                        style: GoogleFonts.rubik(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 15,
-                                          letterSpacing: 0.3,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+ */

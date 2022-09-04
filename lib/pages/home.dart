@@ -21,6 +21,7 @@ import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/home_menu.dart';
 import 'package:scorohod_app/widgets/order_widget.dart';
+import 'package:scorohod_app/services/app_data.dart' as appData;
 import 'package:scorohod_app/widgets/shop_cell.dart';
 
 class HomePage extends StatefulWidget {
@@ -43,8 +44,10 @@ class _HomePageState extends State<HomePage>
   var _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<void> _update(DataProvider provider, OrdersBloc bloc) async {
+    var city = Provider.of<appData.DataProvider>(context);
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
-    var result = await NetHandler(context).getShops();
+    var result = await NetHandler(context).getCityShops(city.city.nameENG);
+    print(city.city.nameENG);
     var categories = await NetHandler(context).getCategories();
     print(provider.user.latLng);
     setAddress(provider);

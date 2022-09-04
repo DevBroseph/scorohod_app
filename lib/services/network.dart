@@ -89,6 +89,16 @@ class NetHandler {
     return data != null ? shopsFromJson(data) : null;
   }
 
+  Future<List<Shop>?> getCityShops(city) async {
+    var data = await _request(
+      url: 'shops/$city',
+      method: Method.get,
+    );
+    // print(data);
+
+    return data != null ? shopsFromJson(data) : null;
+  }
+
   Future<List<CityCoordinates>?> getCoordinates() async {
     var data = await _request(url: "coordinates", method: Method.get);
     print(data);

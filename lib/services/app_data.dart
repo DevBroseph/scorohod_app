@@ -26,6 +26,16 @@ class User {
   });
 }
 
+class City {
+  String nameRU;
+  String nameENG;
+
+  City({
+    required this.nameRU,
+    required this.nameENG,
+  });
+}
+
 class AppData {
   AppData(this._preferences);
 
@@ -38,6 +48,8 @@ class AppData {
   final String _userRoom = "userRoom";
   final String _userEntrance = "userEntrance";
   final String _userFloor = "userFloor";
+  final String _userCityRU = "userCityRU";
+  final String _userCityENG = "userCityENG";
 
   final String _userLatitude = "userLatitude";
   final String _userLongitude = "userLongitude";
@@ -103,6 +115,21 @@ class AppData {
     _preferences.setString(_userFloor, value);
   }
 
+  String getCityRu() {
+    return _preferences.getString(_userCityRU) ?? "";
+  }
+
+  void setCityRu(String value) {
+    _preferences.setString(_userCityRU, value);
+  }
+  String getCityENG() {
+    return _preferences.getString(_userCityENG) ?? "";
+  }
+
+  void setCityENG(String value) {
+    _preferences.setString(_userCityENG, value);
+  }
+
   double getUserLatitude() {
     return _preferences.getDouble(_userLatitude) ?? 0.0;
   }
@@ -129,6 +156,11 @@ class AppData {
     _preferences.setString(_userFloor, user.floor);
     _preferences.setDouble(_userLatitude, user.latLng.latitude);
     _preferences.setDouble(_userLongitude, user.latLng.longitude);
+  }
+
+  void setCity(City city) {
+    _preferences.setString(_userCityRU, city.nameRU);
+    _preferences.setString(_userCityENG, city.nameENG);
   }
 
   void setEmptyUser() {
@@ -295,7 +327,7 @@ class ShopData {
 }
 
 class DataProvider extends ChangeNotifier {
-  DataProvider(this._user, this._currentShop);
+  DataProvider(this._user, this._currentShop, this._city);
 
   User _user;
   User get user => _user;
@@ -305,8 +337,13 @@ class DataProvider extends ChangeNotifier {
   Shop get currentShop => _currentShop;
   bool get hasCurrentShop => _currentShop.shopName != '' ? true : false;
 
+  City _city;
+  City get city => _city;
+  bool get hasCity => _city.nameRU != '' ? true : false;
+
   static Future<DataProvider> getInstance() async {
     var userPrefs = await AppData.getInstance();
+    var cityPrefs = await AppData.getInstance();
     var shopPrefs = await ShopData.getInstance();
 
     return DataProvider(
@@ -336,6 +373,10 @@ class DataProvider extends ChangeNotifier {
         city: shopPrefs.getCity(),
         cityCoordinates: Coordinates(latitude: 0, longitude: 0),
       ),
+      City(
+        nameRU: cityPrefs.getCityRu(),
+        nameENG: cityPrefs.getCityENG()
+      )
     );
   }
 
@@ -451,6 +492,14 @@ class DataProvider extends ChangeNotifier {
     notifyListeners();
     AppData.getInstance().then((value) {
       value.setUser(user);
+    });
+  }
+
+  void changeCity(City city) {
+    _city = city;
+    notifyListeners();
+    AppData.getInstance().then((value) {
+      value.setCity(city);
     });
   }
 
