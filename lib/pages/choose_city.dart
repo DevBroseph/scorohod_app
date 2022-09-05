@@ -27,7 +27,6 @@ class _ChooseCityState extends State<ChooseCity> {
   bool isLoading = false;
   List<String> result = [];
   List<String> resultENG = [];
-  late AppData userCity;
   final YandexGeocoder geo = YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
 
   void getCities () async {
@@ -108,14 +107,28 @@ class _ChooseCityState extends State<ChooseCity> {
                     padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
                     child: GestureDetector(
                       onTap: () {
+                        var isEmptyCity;
+                        if (city.city.nameRU == '') {
+                          isEmptyCity = true;
+                        }  else  {
+                          isEmptyCity = false;
+                        }
                         city.city.nameRU = result[index];
                         print(resultENG[index]);
                         city.city.nameENG = resultENG[index];
-                        Navigator.pushAndRemoveUntil(context,
-                            MaterialPageRoute(
-                            builder: (context) => const HomePage()),
-                            (route) => false
-                        );
+                        city.changeCity(city.city);
+                        if (!isEmptyCity) {
+                          Navigator.pushAndRemoveUntil(context,
+                              MaterialPageRoute(
+                                  builder: (context) => const HomePage()),
+                                  (route) => false
+                          );
+                        }  else  {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const HomePage()));
+                        }
                       },
                       child: Container(
                         height: 60,

@@ -13,6 +13,7 @@ import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
 import 'package:scorohod_app/main.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/shop.dart';
+import 'package:scorohod_app/pages/choose_city.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/pages/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
@@ -44,7 +45,15 @@ class _HomePageState extends State<HomePage>
   var _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<void> _update(DataProvider provider, OrdersBloc bloc) async {
-    var city = Provider.of<appData.DataProvider>(context);
+    var city = Provider.of<appData.DataProvider>(context, listen: false);
+    if (city.city.nameRU == '') {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const ChooseCity()
+          )
+      );
+    }
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
     var result = await NetHandler(context).getCityShops(city.city.nameENG);
     print(city.city.nameENG);

@@ -25,9 +25,6 @@ class HomeMenu extends StatefulWidget {
 }
 
 class HomeMenuState extends State<HomeMenu> {
-  double _height = 50.0;
-  double _opacity = 0.0;
-  int _rotation = 0;
   bool isListVisible = false;
   List<String> result = [];
   late String userCity;

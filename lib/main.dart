@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
+import 'package:scorohod_app/pages/choose_city.dart';
 import 'package:scorohod_app/pages/home.dart';
 import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
@@ -48,7 +49,7 @@ void main() async {
             darkTheme: darkTheme,
             themeMode: ThemeMode.light,
             debugShowCheckedModeBanner: false,
-            home: const HomePage(),
+            home: provider.city.nameRU == '' ? ChooseCity() : HomePage(),
           ),
         ),
       ),
