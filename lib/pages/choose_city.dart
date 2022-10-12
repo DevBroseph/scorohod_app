@@ -27,30 +27,36 @@ class _ChooseCityState extends State<ChooseCity> {
   bool isLoading = false;
   List<String> result = [];
   List<String> resultENG = [];
-  final YandexGeocoder geo = YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
+  final YandexGeocoder geo =
+      YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
 
-  void getCities () async {
+  void getCities() async {
     var answer = await NetHandler(context).getCoordinates();
     if (answer != null) {
-      for (int i = answer.length-1; i>0; i--){
-        var answersCity = await geo.getGeocode(GeocodeRequest(
+      for (int i = answer.length - 1; i > 0; i--) {
+        var answersCity = await geo.getGeocode(
+          GeocodeRequest(
             geocode: PointGeocode(
                 latitude: answer[i].coordinates.latitude,
-                longitude: answer[i].coordinates.longitude
-            ),
-            lang: Lang.ru
-        ));
-        var answersCityEng = await geo.getGeocode(GeocodeRequest(
+                longitude: answer[i].coordinates.longitude),
+            lang: Lang.ru,
+          ),
+        );
+        var answersCityEng = await geo.getGeocode(
+          GeocodeRequest(
             geocode: PointGeocode(
-                latitude: answer[i].coordinates.latitude,
-                longitude: answer[i].coordinates.longitude
+              latitude: answer[i].coordinates.latitude,
+              longitude: answer[i].coordinates.longitude,
             ),
-            lang: Lang.enEn
-        ));
+            lang: Lang.enEn,
+          ),
+        );
         var city = answersCity.firstAddress?.formatted;
         var cityEng = answersCityEng.firstAddress?.formatted;
+
         List<String>? listCityInfo = city?.split(', ');
         List<String>? listCityInfoEng = cityEng?.split(', ');
+
         if (!result.contains(listCityInfo![2])) {
           setState(() {
             result.add(listCityInfo[2]);
@@ -76,92 +82,134 @@ class _ChooseCityState extends State<ChooseCity> {
 
   @override
   Widget build(BuildContext context) {
-    var city = Provider.of<appData.DataProvider>(context);
     return Scaffold(
-      backgroundColor: Color.fromRGBO(247, 247, 247, 1),
-      body: Stack(
-        children: [
-          CustomScrollView(slivers: [
-            SliverAppBar(
-              backgroundColor: Color.fromRGBO(247, 247, 247, 1),
-              pinned: true,
-              foregroundColor: red,
-              title: Text(
-                'Выберите город для доставки',
-                style: GoogleFonts.rubik(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: red,
-                ),
-              ),
+      backgroundColor: const Color.fromRGBO(247, 247, 247, 1),
+      body: CustomScrollView(
+        slivers: [
+          _appBar(),
+          const SliverToBoxAdapter(child: SizedBox(height: 15)),
+          _body(),
+        ],
+      ),
+    );
+  }
+
+  Widget _body() {
+    var city = Provider.of<appData.DataProvider>(context);
+    return isLoading
+        ? SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => _cardWidget(index, city),
+              childCount: result.length,
             ),
-          ]),
-          SafeArea(
-            bottom: true,
-            child: isLoading ? Padding(
-              padding: EdgeInsets.only(top: 50),
-              child: ListView.builder(
-                itemCount: result.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                    child: GestureDetector(
-                      onTap: () {
-                        var isEmptyCity;
-                        if (city.city.nameRU == '') {
-                          isEmptyCity = true;
-                        }  else  {
-                          isEmptyCity = false;
-                        }
-                        city.city.nameRU = result[index];
-                        print(resultENG[index]);
-                        city.city.nameENG = resultENG[index];
-                        city.changeCity(city.city);
-                        if (!isEmptyCity) {
-                          Navigator.pushAndRemoveUntil(context,
-                              MaterialPageRoute(
-                                  builder: (context) => const HomePage()),
-                                  (route) => false
-                          );
-                        }  else  {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const HomePage()));
-                        }
-                      },
-                      child: Container(
-                        height: 60,
-                        alignment: Alignment.centerLeft,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10)
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(result[index], style: TextStyle(fontSize: 20, color: Colors.black87)),
-                              SvgPicture.asset('assets/right.svg', height: 25,),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ) : Container(
+          )
+        : SliverToBoxAdapter(
+            child: Container(
+              height: MediaQuery.of(context).size.height - 200,
               alignment: Alignment.center,
               child: LoadingAnimationWidget.horizontalRotatingDots(
                 color: Theme.of(context).primaryColor,
                 size: 50,
               ),
-            )
-          )
-        ],
+            ),
+          );
+  }
+
+  SliverAppBar _appBar() {
+    return SliverAppBar(
+      backgroundColor: Color.fromRGBO(247, 247, 247, 1),
+      pinned: true,
+      foregroundColor: red,
+      title: Text(
+        'Выберите город для доставки',
+        style: GoogleFonts.rubik(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: red,
+        ),
       ),
     );
+  }
+
+  Widget _cardWidget(int index, DataProvider city) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      child: GestureDetector(
+        onTap: () => _onTap(city, index),
+        child: Container(
+          height: 70,
+          alignment: Alignment.centerLeft,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey[200]!,
+                offset: const Offset(0, 0),
+                spreadRadius: 1,
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+            ),
+            child: ListTile(
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.place,
+                    color: red,
+                  ),
+                  SizedBox(width: 20),
+                  Text(
+                    result[index],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              trailing: SvgPicture.asset(
+                'assets/right.svg',
+                height: 25,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onTap(DataProvider city, int index) {
+    var isEmptyCity;
+    if (city.city.nameRU == '') {
+      isEmptyCity = true;
+    } else {
+      isEmptyCity = false;
+    }
+    city.city.nameRU = result[index];
+    print(resultENG[index]);
+    city.city.nameENG = resultENG[index];
+    city.changeCity(city.city);
+    if (!isEmptyCity) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+        (route) => false,
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+      );
+    }
   }
 }

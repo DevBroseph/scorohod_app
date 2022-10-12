@@ -115,9 +115,27 @@ class NetHandler {
     return data != null ? groupsFromJson(data) : null;
   }
 
+  Future<List<Group>?> getCurrentGroup(String currentGroup) async {
+    var data = await _request(
+      url: "groups/$currentGroup",
+      method: Method.get,
+    );
+
+    return data != null ? groupsFromJson(data) : null;
+  }
+
   Future<List<Product>?> getProducts() async {
     var data = await _request(
       url: "nomenclatures",
+      method: Method.get,
+    );
+    // print(data);
+    return data != null ? productsFromJson(data) : null;
+  }
+
+  Future<List<Product>?> getProductsByShop(String shopId) async {
+    var data = await _request(
+      url: "nomenclatures/$shopId",
       method: Method.get,
     );
     // print(data);

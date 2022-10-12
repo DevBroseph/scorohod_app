@@ -74,7 +74,7 @@ class GroupCard extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.bottomLeft,
                       child: Opacity(
-                        opacity: 0.8,
+                        opacity: 1,
                         child: Image.memory(
                           base64Decode(
                             _perrentGroups[index].groupImage,

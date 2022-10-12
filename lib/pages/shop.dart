@@ -39,7 +39,7 @@ class _ShopPageState extends State<ShopPage> {
   Future<void> _update() async {
     var shop = Provider.of<DataProvider>(context).currentShop;
     var result = await NetHandler(context).getGroups();
-    var products = await NetHandler(context).getProducts();
+    var products = await NetHandler(context).getProductsByShop(shop.shopId);
 
     _allGroups = result ?? [];
 

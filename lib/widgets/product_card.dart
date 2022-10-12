@@ -90,6 +90,7 @@ class _ProductCardState extends State<ProductCard> {
                         widget.item.name.length < 51
                             ? widget.item.name
                             : widget.item.name.substring(0, 50) + '...',
+                        maxLines: 4,
                         // widget.item.name,
                         style: GoogleFonts.rubik(
                             fontWeight: FontWeight.w500, fontSize: 15),

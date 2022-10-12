@@ -52,10 +52,12 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    print(widget.products.first.groupId);
     for (var itemGroup in widget.groups) {
-      if (itemGroup.parentId == widget.perrent.id) {
+      if (itemGroup.id == widget.perrent.id ||
+          itemGroup.parentId == widget.perrent.id) {
         for (var item in widget.products) {
-          if (item.groupId == itemGroup.id && item.archive != '1') {
+          if (item.groupId == itemGroup.id) {
             _perrentProducts.add(item);
           }
         }
@@ -64,6 +66,9 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
             .isNotEmpty) {
           _perrentGroups.add(itemGroup);
         }
+        print(widget.products
+            .where((element) => element.groupId == itemGroup.id)
+            .isNotEmpty);
       }
     }
     // setState(() {
@@ -196,7 +201,9 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                             ),
                             snap: false,
                             actions: [
-                              IconButton(
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: IconButton(
                                   onPressed: () {
                                     // setState(() {
                                     _streamController.sink.add(true);
@@ -205,7 +212,9 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                                   icon: Icon(
                                     Icons.search,
                                     color: widget.color,
-                                  ))
+                                  ),
+                                ),
+                              )
                             ],
                           ),
                           if (_tabController != null)
@@ -262,7 +271,20 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
                                 childCount: _perrentGroups.length,
                               ),
                             ),
-                          SliverToBoxAdapter(
+                          if (_perrentGroups.isEmpty)
+                            SliverToBoxAdapter(
+                              child: Center(
+                                  child: Padding(
+                                padding: EdgeInsets.only(
+                                  top: MediaQuery.of(context).size.height / 4,
+                                ),
+                                child: const Text(
+                                  'Тут пока пусто, но мы занимаемся этим!',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                              )),
+                            ),
+                          const SliverToBoxAdapter(
                             child: SizedBox(
                               height: 400,
                             ),

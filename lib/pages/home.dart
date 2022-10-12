@@ -48,11 +48,7 @@ class _HomePageState extends State<HomePage>
     var city = Provider.of<appData.DataProvider>(context, listen: false);
     if (city.city.nameRU == '') {
       Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const ChooseCity()
-          )
-      );
+          context, MaterialPageRoute(builder: (context) => const ChooseCity()));
     }
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
     var result = await NetHandler(context).getCityShops(city.city.nameENG);
@@ -140,14 +136,14 @@ class _HomePageState extends State<HomePage>
         child: Stack(
           children: [
             CustomScrollView(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               slivers: [
                 if (_categories.isNotEmpty)
                   SliverAppBar(
                     pinned: true,
                     elevation: 0,
                     leading: InkWell(
-                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      borderRadius: const BorderRadius.all(Radius.circular(40)),
                       onTap: () {
                         _scaffoldKey.currentState!.openDrawer();
                       },
@@ -188,39 +184,40 @@ class _HomePageState extends State<HomePage>
                 if (_categories.isNotEmpty)
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
-                        (context, index) => Align(
-                              alignment: Alignment.topLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (_list
-                                      .where((element) =>
-                                          element.shop.categoryId ==
-                                          _categories[index].categoryId)
-                                      .isNotEmpty)
-                                    Padding(
-                                      padding: EdgeInsets.all(15),
-                                      child: Text(
-                                        _categories[index].categoryName,
-                                        style: GoogleFonts.rubik(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  Wrap(
-                                    runSpacing: 15,
-                                    children: _list
-                                        .where((element) =>
-                                            element.shop.categoryId ==
-                                            _categories[index].categoryId)
-                                        .toList(),
+                      (context, index) => Align(
+                        alignment: Alignment.topLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_list
+                                .where((element) =>
+                                    element.shop.categoryId ==
+                                    _categories[index].categoryId)
+                                .isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.all(15),
+                                child: Text(
+                                  _categories[index].categoryName,
+                                  style: GoogleFonts.rubik(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                ],
+                                  textAlign: TextAlign.left,
+                                ),
                               ),
+                            Wrap(
+                              runSpacing: 15,
+                              children: _list
+                                  .where((element) =>
+                                      element.shop.categoryId ==
+                                      _categories[index].categoryId)
+                                  .toList(),
                             ),
-                        childCount: _categories.length),
+                          ],
+                        ),
+                      ),
+                      childCount: _categories.length,
+                    ),
                   ),
                 // if (_categories.isNotEmpty)
                 //   SliverToBoxAdapter(
