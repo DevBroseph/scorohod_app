@@ -5,12 +5,18 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:scale_button/scale_button.dart';
+import 'package:scorohod_app/bloc/orders_bloc/orders.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
+import 'package:scorohod_app/objects/order_element.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/widgets/bottom_dialog_product_info.dart';
+
+import '../bloc/orders_bloc/orders_event.dart';
+import 'button.dart';
 
 class ProductCard extends StatefulWidget {
   const ProductCard({
@@ -30,7 +36,10 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   bool isTake = false;
+  bool wasAdded = false;
+  int quantity = 0;
   StreamController<bool> _streamController = StreamController<bool>();
+  StreamController<int> _countStreamController = StreamController<int>();
 
   void getVisibility(OrdersBloc bloc) {
     if (bloc.products
@@ -41,6 +50,27 @@ class _ProductCardState extends State<ProductCard> {
               .quantity >
           0);
     }
+  }
+
+  bool getId(OrdersBloc bloc, int id) {
+    for(int i = 0; i < bloc.products.length; i++) {
+      if(bloc.products[i].id == id) {
+        return true;
+        break;
+      }
+    }
+    return false;
+  }
+
+  int getQuantity(OrdersBloc bloc, int id) {
+    for(int i = 0; i < bloc.products.length; i++) {
+      if(bloc.products[i].id == id) {
+        print(bloc.products[i].quantity.toString() + ' функция');
+        return bloc.products[i].quantity;
+        break;
+      }
+    }
+    return 0;
   }
 
   @override
@@ -59,6 +89,8 @@ class _ProductCardState extends State<ProductCard> {
             builder: (context) => ProductInfoBottomDialog(
               color: widget.color,
               product: widget.item,
+              callBack: (value) {
+              },
             ),
           );
         },
@@ -90,6 +122,7 @@ class _ProductCardState extends State<ProductCard> {
                         widget.item.name.length < 51
                             ? widget.item.name
                             : widget.item.name.substring(0, 50) + '...',
+                        maxLines: 4,
                         // widget.item.name,
                         style: GoogleFonts.rubik(
                             fontWeight: FontWeight.w500, fontSize: 15),
@@ -113,16 +146,92 @@ class _ProductCardState extends State<ProductCard> {
                         child: Stack(
                           children: [
                             Center(
-                              child: Text(
+                              child: !getId(bloc, int.parse(widget.item.nomenclatureId)) ?
+                              Text(
                                 widget.item.price
-                                        .toInt()
-                                        // .toStringAsFixed(2)
-                                        .toString() +
+                                    .toInt()
+                                    .toString() +
                                     ' ₽',
                                 style: GoogleFonts.rubik(
                                     fontSize: 14,
                                     color: Colors.black,
                                     fontWeight: FontWeight.w400),
+                              )
+                                  :
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ScaleButton(
+                                    duration: const Duration(milliseconds: 150),
+                                    bound: 0.05,
+                                    onTap: () {
+                                      if (getQuantity(bloc, int.parse(widget.item.nomenclatureId)) > 0) {
+                                        bloc.add(
+                                          AddProduct(
+                                              orderElement: OrderElement(
+                                                  id: int.parse(widget.item.nomenclatureId),
+                                                  basePrice: widget.item.price.toDouble(),
+                                                  quantity: getQuantity(bloc, int.parse(widget.item.nomenclatureId)) - 1,
+                                                  price: getQuantity(bloc, int.parse(widget.item.nomenclatureId))
+                                                      * widget.item.price,
+                                                  name: widget.item.name,
+                                                  weight: widget.item.measure,
+                                                  image: widget.item.image)
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Image.asset(
+                                      "assets/button_del_big.png",
+                                      height: 30,
+                                      width: 30,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 36,
+                                    child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: BlocBuilder<OrdersBloc, OrdersState>(
+                                          builder: (context, snapshot) {
+                                            return Text(
+                                              getQuantity(bloc, int.parse(widget.item.nomenclatureId)).toString(),
+                                              style: GoogleFonts.rubik(
+                                                fontSize: 18,
+                                                height: 1.2,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            );
+                                          }
+                                        )
+                                    ),
+                                  ),
+                                  ScaleButton(
+                                    duration: const Duration(milliseconds: 150),
+                                    bound: 0.05,
+                                    onTap: () {
+                                      var quantity = getQuantity(bloc, int.parse(widget.item.nomenclatureId));
+                                      bloc.add(
+                                        AddProduct(
+                                            orderElement: OrderElement(
+                                                id: int.parse(widget.item.nomenclatureId),
+                                                basePrice: widget.item.price.toDouble(),
+                                                quantity: quantity + 1,
+                                                price: (quantity + 1) * widget.item.price,
+                                                name: widget.item.name,
+                                                weight: widget.item.measure,
+                                                image: widget.item.image)
+                                        ),
+                                      );
+                                      double totalPrice = 0;
+                                      for (var element
+                                      in BlocProvider.of<OrdersBloc>(context).products) {
+                                        totalPrice += getQuantity(bloc, int.parse(widget.item.nomenclatureId))
+                                            * widget.item.price;
+                                      }
+                                    },
+                                    child: AddColorButton(color: widget.color),
+                                  ),
+                                ],
                               ),
                             ),
                             StreamBuilder<bool>(

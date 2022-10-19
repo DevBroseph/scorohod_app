@@ -17,11 +17,13 @@ import 'package:zoom_pinch_overlay/zoom_pinch_overlay.dart';
 class ProductInfoBottomDialog extends StatefulWidget {
   final Product product;
   final Color color;
+  final void Function(int) callBack;
 
   const ProductInfoBottomDialog({
     Key? key,
     required this.product,
     required this.color,
+    required this.callBack,
   }) : super(key: key);
 
   @override
@@ -32,8 +34,15 @@ class _State extends State<ProductInfoBottomDialog> {
   int checkedSizeId = 0;
   int count = 0;
   bool countTrue = false;
+  double productPrice = 0;
 
   StreamController<int> _countStreamController = StreamController<int>();
+
+  @override
+  void initState() {
+    productPrice = widget.product.price;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +285,7 @@ class _State extends State<ProductInfoBottomDialog> {
               ),
             ),
             width: MediaQuery.of(context).size.width,
-            height: 85 + bottom,
+            height: 86 + bottom,
             child: Column(
               children: [
                 Padding(
@@ -369,6 +378,8 @@ class _State extends State<ProductInfoBottomDialog> {
                             //           element.name == widget.product.name)
                             //       .quantity += count != 0 ? count : 1;
                             // } else {
+                            widget.callBack(count);
+                            print('Добавить');
                             BlocProvider.of<OrdersBloc>(context).add(
                               AddProduct(
                                   orderElement: OrderElement(
@@ -381,7 +392,8 @@ class _State extends State<ProductInfoBottomDialog> {
                                           widget.product.price,
                                       name: widget.product.name,
                                       weight: widget.product.measure,
-                                      image: widget.product.image)),
+                                      image: widget.product.image)
+                              ),
                             );
                             // }
                             Navigator.of(context).pop();

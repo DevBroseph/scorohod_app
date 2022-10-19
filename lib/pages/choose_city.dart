@@ -25,7 +25,7 @@ class ChooseCity extends StatefulWidget {
 
 class _ChooseCityState extends State<ChooseCity> {
   bool isLoading = false;
-  List<String> result = [];
+  List<String?> result = [];
   List<String> resultENG = [];
   final YandexGeocoder geo = YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
 
@@ -33,33 +33,22 @@ class _ChooseCityState extends State<ChooseCity> {
     var answer = await NetHandler(context).getCoordinates();
     if (answer != null) {
       for (int i = answer.length-1; i>0; i--){
+        print(answer[i].coordinates.latitude);
+        print(answer[i].coordinates.longitude);
+        print('\n');
         var answersCity = await geo.getGeocode(GeocodeRequest(
             geocode: PointGeocode(
                 latitude: answer[i].coordinates.latitude,
                 longitude: answer[i].coordinates.longitude
             ),
-            lang: Lang.ru
-        ));
-        var answersCityEng = await geo.getGeocode(GeocodeRequest(
-            geocode: PointGeocode(
-                latitude: answer[i].coordinates.latitude,
-                longitude: answer[i].coordinates.longitude
-            ),
-            lang: Lang.enEn
+            lang: Lang.ru,
+            kind: KindRequest.locality,
         ));
         var city = answersCity.firstAddress?.formatted;
-        var cityEng = answersCityEng.firstAddress?.formatted;
+        print(city);
         List<String>? listCityInfo = city?.split(', ');
-        List<String>? listCityInfoEng = cityEng?.split(', ');
-        if (!result.contains(listCityInfo![2])) {
-          setState(() {
-            result.add(listCityInfo[2]);
-          });
-        }
-        if (!resultENG.contains(listCityInfoEng![2])) {
-          setState(() {
-            resultENG.add(listCityInfoEng[2]);
-          });
+        if (!result.contains(listCityInfo?.last)) {
+          result.add(listCityInfo?.last);
         }
       }
       setState(() {
@@ -113,7 +102,7 @@ class _ChooseCityState extends State<ChooseCity> {
                         }  else  {
                           isEmptyCity = false;
                         }
-                        city.city.nameRU = result[index];
+                        city.city.nameRU = result[index]!;
                         print(resultENG[index]);
                         city.city.nameENG = resultENG[index];
                         city.changeCity(city.city);
@@ -142,7 +131,7 @@ class _ChooseCityState extends State<ChooseCity> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(result[index], style: TextStyle(fontSize: 20, color: Colors.black87)),
+                              Text(result[index]!, style: TextStyle(fontSize: 20, color: Colors.black87)),
                               SvgPicture.asset('assets/right.svg', height: 25,),
                             ],
                           ),

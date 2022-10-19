@@ -18,6 +18,8 @@ import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 
+import '../objects/courier_info.dart';
+
 enum Method { get, post, put, delete, patch }
 
 class NetHandler {
@@ -171,6 +173,14 @@ class NetHandler {
       method: Method.get,
     );
     return data != null ? courierLocationFromJson(data) : null;
+  }
+
+  Future<CourierInfo?> getCourierInfo(String id) async {
+    var data = await _request(
+      url: "couriers/17",
+      method: Method.get,
+    );
+    return data != null ? courierInfoFromJson(data) : null;
   }
 
   Future<object.User?> auth(

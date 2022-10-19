@@ -26,6 +26,7 @@ class DirectionsRepository {
 
     // Check if response is successful
     if (response.statusCode == 200) {
+      print(response.data);
       return Directions.fromMap(response.data);
     }
     return null;

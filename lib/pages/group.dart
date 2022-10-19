@@ -52,10 +52,12 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    print(widget.products.first.groupId);
     for (var itemGroup in widget.groups) {
-      if (itemGroup.parentId == widget.perrent.id) {
+      if (itemGroup.id == widget.perrent.id ||
+          itemGroup.parentId == widget.perrent.id) {
         for (var item in widget.products) {
-          if (item.groupId == itemGroup.id && item.archive != '1') {
+          if (item.groupId == itemGroup.id) {
             _perrentProducts.add(item);
           }
         }
@@ -64,6 +66,9 @@ class _GroupPageState extends State<GroupPage> with TickerProviderStateMixin {
             .isNotEmpty) {
           _perrentGroups.add(itemGroup);
         }
+        print(widget.products
+            .where((element) => element.groupId == itemGroup.id)
+            .isNotEmpty);
       }
     }
     // setState(() {

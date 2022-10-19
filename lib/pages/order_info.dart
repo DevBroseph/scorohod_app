@@ -8,6 +8,7 @@ import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/objects/coordinates.dart';
+import 'package:scorohod_app/objects/courier_info.dart';
 import 'package:scorohod_app/objects/order.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
@@ -47,6 +48,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
   BitmapDescriptor? _userIcon;
 
   Directions? _info;
+  CourierInfo? _courierInfo;
 
   bool _mapInit = false;
 
@@ -95,7 +97,18 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
   void didChangeDependencies() {
     _getCourierLocation();
     _getIcons();
+    _getCourierInfo();
     super.didChangeDependencies();
+  }
+
+  void _getCourierInfo() async {
+    var result = await NetHandler(context).getCourierInfo('17');
+    if (result != null) {
+      setState(() {
+        _courierInfo = result;
+      });
+      print(result.courierPhone);
+    }
   }
 
   void _getIcons() {
@@ -151,7 +164,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     return Scaffold(
       body: Stack(
         children: [
-          if (_info != null)
+          if (_info == null && _courierInfo != null)
             CustomScrollView(slivers: [
               SliverAppBar(
                 pinned: true,
@@ -211,36 +224,38 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                       decoration: BoxDecoration(
                           borderRadius: radius, boxShadow: shadow),
                       child: Align(
-                        child: GoogleMap(
-                            myLocationButtonEnabled: false,
-                            zoomControlsEnabled: false,
-                            initialCameraPosition: CameraPosition(
-                              target: getCenterLatLng(provider),
-                              zoom: 11.5,
-                            ),
-                            markers: {
-                              if (_userMarker != null) _userMarker!,
-                              if (_shopMarker != null) _shopMarker!,
-                              if (_courierMarker != null) _courierMarker!
-                            },
-                            polylines: {
-                              if (_info != null && _mapInit)
-                                Polyline(
-                                  polylineId: PolylineId('route'),
-                                  color: red,
-                                  width: 5,
-                                  points: _info!.polylinePoints
-                                      .map((e) =>
-                                          LatLng(e.latitude, e.longitude))
-                                      .toList(),
-                                )
-                            },
-                            onMapCreated: (controller) {
-                              _mapController = controller;
-                              _mapController!.animateCamera(
-                                  CameraUpdate.newLatLngBounds(
-                                      _info!.bounds, 50.0));
-                            }),
+                        child: Container(),
+                        // child: GoogleMap(
+                        //     myLocationButtonEnabled: false,
+                        //     zoomControlsEnabled: false,
+                        //     initialCameraPosition: CameraPosition(
+                        //       target: getCenterLatLng(provider),
+                        //       zoom: 11.5,
+                        //     ),
+                        //     markers: {
+                        //       if (_userMarker != null) _userMarker!,
+                        //       if (_shopMarker != null) _shopMarker!,
+                        //       if (_courierMarker != null) _courierMarker!
+                        //     },
+                        //     polylines: {
+                        //       if (_info != null && _mapInit)
+                        //         Polyline(
+                        //           polylineId: PolylineId('route'),
+                        //           color: red,
+                        //           width: 5,
+                        //           points: _info!.polylinePoints
+                        //               .map((e) =>
+                        //                   LatLng(e.latitude, e.longitude))
+                        //               .toList(),
+                        //         )
+                        //     },
+                        //     onMapCreated: (controller) {
+                        //       _mapController = controller;
+                        //       _mapController!.animateCamera(
+                        //           CameraUpdate.newLatLngBounds(
+                        //               _info!.bounds, 50.0));
+                        //     }
+                        //     ),
                       ),
                     ),
                   ),
@@ -296,13 +311,17 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                     'Адрес доставки',
                     widget.order.address,
                   ),
+                  _bottomCard(
+                    'Номер курьера',
+                    _courierInfo!.courierPhone == '' ? 'Номер не указан' : _courierInfo!.courierPhone,
+                  ),
                 ]),
               ),
               const SliverToBoxAdapter(
                 child: SizedBox(height: 50),
               ),
             ]),
-          if (_info == null)
+          if (_info != null || _courierInfo == null)
             SizedBox(
               height: MediaQuery.of(context).size.height,
               child: Align(
