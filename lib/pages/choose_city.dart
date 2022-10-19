@@ -26,16 +26,13 @@ class ChooseCity extends StatefulWidget {
 class _ChooseCityState extends State<ChooseCity> {
   bool isLoading = false;
   List<String?> result = [];
-  List<String> resultENG = [];
+  List<String?> resultENG = [];
   final YandexGeocoder geo = YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
 
   void getCities () async {
     var answer = await NetHandler(context).getCoordinates();
     if (answer != null) {
       for (int i = answer.length-1; i>0; i--){
-        print(answer[i].coordinates.latitude);
-        print(answer[i].coordinates.longitude);
-        print('\n');
         var answersCity = await geo.getGeocode(GeocodeRequest(
             geocode: PointGeocode(
                 latitude: answer[i].coordinates.latitude,
@@ -44,11 +41,23 @@ class _ChooseCityState extends State<ChooseCity> {
             lang: Lang.ru,
             kind: KindRequest.locality,
         ));
+        var answersCityENG = await geo.getGeocode(GeocodeRequest(
+          geocode: PointGeocode(
+              latitude: answer[i].coordinates.latitude,
+              longitude: answer[i].coordinates.longitude
+          ),
+          lang: Lang.enEn,
+          kind: KindRequest.locality,
+        ));
         var city = answersCity.firstAddress?.formatted;
-        print(city);
+        var cityENG = answersCityENG.firstAddress?.formatted;
         List<String>? listCityInfo = city?.split(', ');
+        List<String>? listCityInfoENG = cityENG?.split(', ');
         if (!result.contains(listCityInfo?.last)) {
           result.add(listCityInfo?.last);
+        }
+        if (!resultENG.contains(listCityInfoENG?.last)) {
+          resultENG.add(listCityInfoENG?.last);
         }
       }
       setState(() {
@@ -102,9 +111,9 @@ class _ChooseCityState extends State<ChooseCity> {
                         }  else  {
                           isEmptyCity = false;
                         }
-                        city.city.nameRU = result[index]!;
                         print(resultENG[index]);
-                        city.city.nameENG = resultENG[index];
+                        city.city.nameRU = result[index]!;
+                        city.city.nameENG = resultENG[index]!;
                         city.changeCity(city.city);
                         if (!isEmptyCity) {
                           Navigator.pushAndRemoveUntil(context,

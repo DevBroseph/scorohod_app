@@ -164,7 +164,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     return Scaffold(
       body: Stack(
         children: [
-          if (_info == null && _courierInfo != null)
+          if (_info != null && _courierInfo != null)
             CustomScrollView(slivers: [
               SliverAppBar(
                 pinned: true,
@@ -224,38 +224,37 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                       decoration: BoxDecoration(
                           borderRadius: radius, boxShadow: shadow),
                       child: Align(
-                        child: Container(),
-                        // child: GoogleMap(
-                        //     myLocationButtonEnabled: false,
-                        //     zoomControlsEnabled: false,
-                        //     initialCameraPosition: CameraPosition(
-                        //       target: getCenterLatLng(provider),
-                        //       zoom: 11.5,
-                        //     ),
-                        //     markers: {
-                        //       if (_userMarker != null) _userMarker!,
-                        //       if (_shopMarker != null) _shopMarker!,
-                        //       if (_courierMarker != null) _courierMarker!
-                        //     },
-                        //     polylines: {
-                        //       if (_info != null && _mapInit)
-                        //         Polyline(
-                        //           polylineId: PolylineId('route'),
-                        //           color: red,
-                        //           width: 5,
-                        //           points: _info!.polylinePoints
-                        //               .map((e) =>
-                        //                   LatLng(e.latitude, e.longitude))
-                        //               .toList(),
-                        //         )
-                        //     },
-                        //     onMapCreated: (controller) {
-                        //       _mapController = controller;
-                        //       _mapController!.animateCamera(
-                        //           CameraUpdate.newLatLngBounds(
-                        //               _info!.bounds, 50.0));
-                        //     }
-                        //     ),
+                        child: GoogleMap(
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                            initialCameraPosition: CameraPosition(
+                              target: getCenterLatLng(provider),
+                              zoom: 11.5,
+                            ),
+                            markers: {
+                              if (_userMarker != null) _userMarker!,
+                              if (_shopMarker != null) _shopMarker!,
+                              if (_courierMarker != null) _courierMarker!
+                            },
+                            polylines: {
+                              if (_info != null && _mapInit)
+                                Polyline(
+                                  polylineId: PolylineId('route'),
+                                  color: red,
+                                  width: 5,
+                                  points: _info!.polylinePoints
+                                      .map((e) =>
+                                          LatLng(e.latitude, e.longitude))
+                                      .toList(),
+                                )
+                            },
+                            onMapCreated: (controller) {
+                              _mapController = controller;
+                              _mapController!.animateCamera(
+                                  CameraUpdate.newLatLngBounds(
+                                      _info!.bounds, 50.0));
+                            }
+                            ),
                       ),
                     ),
                   ),
@@ -321,7 +320,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                 child: SizedBox(height: 50),
               ),
             ]),
-          if (_info != null || _courierInfo == null)
+          if (_info == null || _courierInfo == null)
             SizedBox(
               height: MediaQuery.of(context).size.height,
               child: Align(

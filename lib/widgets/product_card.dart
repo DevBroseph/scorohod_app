@@ -96,7 +96,7 @@ class _ProductCardState extends State<ProductCard> {
         },
         child: Container(
           width: (MediaQuery.of(context).size.width - 48) / 2,
-          height: widget.width + 80,
+          height: widget.width + 85,
           decoration: BoxDecoration(
             borderRadius: radius,
             boxShadow: shadow,
@@ -172,7 +172,7 @@ class _ProductCardState extends State<ProductCard> {
                                                   id: int.parse(widget.item.nomenclatureId),
                                                   basePrice: widget.item.price.toDouble(),
                                                   quantity: getQuantity(bloc, int.parse(widget.item.nomenclatureId)) - 1,
-                                                  price: getQuantity(bloc, int.parse(widget.item.nomenclatureId))
+                                                  price: (getQuantity(bloc, int.parse(widget.item.nomenclatureId)) - 1)
                                                       * widget.item.price,
                                                   name: widget.item.name,
                                                   weight: widget.item.measure,

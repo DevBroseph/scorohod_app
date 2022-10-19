@@ -285,7 +285,7 @@ class _State extends State<ProductInfoBottomDialog> {
               ),
             ),
             width: MediaQuery.of(context).size.width,
-            height: 86 + bottom,
+            height: 90 + bottom,
             child: Column(
               children: [
                 Padding(
