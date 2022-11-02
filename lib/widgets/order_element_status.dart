@@ -37,7 +37,7 @@ class OrderElementStatusCard extends StatelessWidget {
               order: order,
               shop: shop,
             ),
-            fullscreenDialog: true);
+            fullscreenDialog: false);
       },
       child: Container(
         // margin: const EdgeInsets.only(

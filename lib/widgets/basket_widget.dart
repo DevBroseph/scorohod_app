@@ -31,7 +31,8 @@ class _State extends State<BasketWidget> {
     var provider = Provider.of<DataProvider>(context);
     return BlocBuilder<OrdersBloc, OrdersState>(
       builder: (context, state) {
-        if (BlocProvider.of<OrdersBloc>(context).products.isEmpty) {
+        if (BlocProvider.of<OrdersBloc>(context).products.isEmpty ||
+            BlocProvider.of<OrdersBloc>(context).servicePrice == 0) {
           return Container();
         } else {
           var sum = BlocProvider.of<OrdersBloc>(context);

@@ -40,6 +40,11 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
       for (var element in products) {
         totalPrice += element.price;
       }
+      for (var product in products) {
+        if (product.quantity == 0) {
+          products.removeWhere((element) => element.id == product.id);
+        }
+      }
 
       yield OrderIdle();
     }

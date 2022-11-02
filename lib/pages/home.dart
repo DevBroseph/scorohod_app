@@ -32,8 +32,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   var _address = "Укажите свой адрес";
   var _search = false;
 
@@ -52,9 +51,7 @@ class _HomePageState extends State<HomePage>
     }
     var width = MediaQuery.of(context).size.width / 2 - 22.5;
     var result = await NetHandler(context).getCityShops(city.city.nameENG);
-    print(city.city.nameENG);
     var categories = await NetHandler(context).getCategories();
-    print(provider.user.latLng);
     setAddress(provider);
 
     if (categories != null) {
@@ -117,12 +114,25 @@ class _HomePageState extends State<HomePage>
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    var provider = Provider.of<DataProvider>(context);
+    var bloc = BlocProvider.of<OrdersBloc>(context);
+    _update(provider, bloc);
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var provider = Provider.of<DataProvider>(context);
     var bloc = BlocProvider.of<OrdersBloc>(context);
-    if (_list.isEmpty) {
-      _update(provider, bloc);
-    }
+    // if (_list.isEmpty) {
+    //   _update(provider, bloc);
+    // }
 
     if (provider.user.address != _address) {
       setAddress(provider);

@@ -8,6 +8,7 @@ import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/objects/coordinates.dart';
+import 'package:scorohod_app/objects/courier_info.dart';
 import 'package:scorohod_app/objects/order.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
@@ -16,6 +17,7 @@ import 'package:scorohod_app/services/directions_model.dart';
 import 'package:scorohod_app/services/directions_repository.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/order_element.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderInfoPage extends StatefulWidget {
   const OrderInfoPage({
@@ -47,6 +49,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
   BitmapDescriptor? _userIcon;
 
   Directions? _info;
+  CourierInfo? _courierInfo;
 
   bool _mapInit = false;
 
@@ -95,7 +98,18 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
   void didChangeDependencies() {
     _getCourierLocation();
     _getIcons();
+    _getCourierInfo();
     super.didChangeDependencies();
+  }
+
+  void _getCourierInfo() async {
+    var result = await NetHandler(context).getCourierInfo('17');
+    if (result != null) {
+      setState(() {
+        _courierInfo = result;
+      });
+      print(result.courierPhone);
+    }
   }
 
   void _getIcons() {
@@ -151,7 +165,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     return Scaffold(
       body: Stack(
         children: [
-          if (_info != null)
+          if (_info != null && _courierInfo != null)
             CustomScrollView(slivers: [
               SliverAppBar(
                 pinned: true,
@@ -296,13 +310,19 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                     'Адрес доставки',
                     widget.order.address,
                   ),
+                  _bottomCard(
+                    'Номер курьера',
+                    _courierInfo!.courierPhone == ''
+                        ? 'Номер не указан'
+                        : _courierInfo!.courierPhone,
+                  ),
                 ]),
               ),
               const SliverToBoxAdapter(
                 child: SizedBox(height: 50),
               ),
             ]),
-          if (_info == null)
+          if (_info == null || _courierInfo == null)
             SizedBox(
               height: MediaQuery.of(context).size.height,
               child: Align(
@@ -319,22 +339,31 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
   }
 
   Widget _bottomCard(String title, String subtitle, {double? height}) {
-    return SizedBox(
-      height: height ?? 80,
-      child: ListTile(
-        title: Text(
-          title,
-          style: GoogleFonts.rubik(
-              color: Colors.grey[500],
-              fontWeight: FontWeight.w500,
-              fontSize: 15),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Text(
-            subtitle,
+    return GestureDetector(
+      onTap: () {
+        if (title == 'Номер курьера') {
+          launch("tel://${subtitle}");
+        }
+      },
+      child: SizedBox(
+        height: height ?? 80,
+        child: ListTile(
+          title: Text(
+            title,
             style: GoogleFonts.rubik(
-                color: Colors.black, fontWeight: FontWeight.w500, fontSize: 15),
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+                fontSize: 15),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              subtitle,
+              style: GoogleFonts.rubik(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15),
+            ),
           ),
         ),
       ),

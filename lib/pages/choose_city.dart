@@ -25,8 +25,8 @@ class ChooseCity extends StatefulWidget {
 
 class _ChooseCityState extends State<ChooseCity> {
   bool isLoading = false;
-  List<String> result = [];
-  List<String> resultENG = [];
+  List<String?> result = [];
+  List<String?> resultENG = [];
   final YandexGeocoder geo =
       YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
 
@@ -34,38 +34,29 @@ class _ChooseCityState extends State<ChooseCity> {
     var answer = await NetHandler(context).getCoordinates();
     if (answer != null) {
       for (int i = answer.length - 1; i > 0; i--) {
-        var answersCity = await geo.getGeocode(
-          GeocodeRequest(
-            geocode: PointGeocode(
-                latitude: answer[i].coordinates.latitude,
-                longitude: answer[i].coordinates.longitude),
-            lang: Lang.ru,
-          ),
-        );
-        var answersCityEng = await geo.getGeocode(
-          GeocodeRequest(
-            geocode: PointGeocode(
+        var answersCity = await geo.getGeocode(GeocodeRequest(
+          geocode: PointGeocode(
               latitude: answer[i].coordinates.latitude,
-              longitude: answer[i].coordinates.longitude,
-            ),
-            lang: Lang.enEn,
-          ),
-        );
+              longitude: answer[i].coordinates.longitude),
+          lang: Lang.ru,
+          kind: KindRequest.locality,
+        ));
+        var answersCityENG = await geo.getGeocode(GeocodeRequest(
+          geocode: PointGeocode(
+              latitude: answer[i].coordinates.latitude,
+              longitude: answer[i].coordinates.longitude),
+          lang: Lang.enEn,
+          kind: KindRequest.locality,
+        ));
         var city = answersCity.firstAddress?.formatted;
-        var cityEng = answersCityEng.firstAddress?.formatted;
-
+        var cityENG = answersCityENG.firstAddress?.formatted;
         List<String>? listCityInfo = city?.split(', ');
-        List<String>? listCityInfoEng = cityEng?.split(', ');
-
-        if (!result.contains(listCityInfo![2])) {
-          setState(() {
-            result.add(listCityInfo[2]);
-          });
+        List<String>? listCityInfoENG = cityENG?.split(', ');
+        if (!result.contains(listCityInfo?.last)) {
+          result.add(listCityInfo?.last);
         }
-        if (!resultENG.contains(listCityInfoEng![2])) {
-          setState(() {
-            resultENG.add(listCityInfoEng[2]);
-          });
+        if (!resultENG.contains(listCityInfoENG?.last)) {
+          resultENG.add(listCityInfoENG?.last);
         }
       }
       setState(() {
@@ -164,7 +155,7 @@ class _ChooseCityState extends State<ChooseCity> {
                   ),
                   SizedBox(width: 20),
                   Text(
-                    result[index],
+                    result[index]!,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -191,25 +182,18 @@ class _ChooseCityState extends State<ChooseCity> {
     } else {
       isEmptyCity = false;
     }
-    city.city.nameRU = result[index];
     print(resultENG[index]);
-    city.city.nameENG = resultENG[index];
+    city.city.nameRU = result[index]!;
+    city.city.nameENG = resultENG[index]!;
     city.changeCity(city.city);
     if (!isEmptyCity) {
       Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-        (route) => false,
-      );
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false);
     } else {
       Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-      );
+          context, MaterialPageRoute(builder: (context) => const HomePage()));
     }
   }
 }
