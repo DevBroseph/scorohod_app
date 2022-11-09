@@ -84,19 +84,34 @@ class _BasketPageState extends State<BasketPage> {
       if (addresses.city.contains(provider.currentShop.city) ||
           provider.currentShop.city.contains(addresses.city)) {
         print('contains');
-        BlocProvider.of<OrdersBloc>(context).add(
-          AddDeliveryPrice(
-            price: _insideSum.toDouble(),
-            servicePrice: 0,
-            city: true,
-            distance: '0',
-          ),
-        );
-        print(distance);
-        // provider.currentShop.coordinates.latitude;
-        setState(() {
-          _deliveryPrice = _insideSum.toDouble();
-        });
+        if (provider.currentShop.city.contains('District') &&
+            addresses.city.contains('District')) {
+          BlocProvider.of<OrdersBloc>(context).add(
+            AddDeliveryPrice(
+              price: _insideSum.toDouble(),
+              servicePrice: 0,
+              city: true,
+              distance: '0',
+            ),
+          );
+          print(distance);
+          // provider.currentShop.coordinates.latitude;
+          setState(() {
+            _deliveryPrice = _insideSum.toDouble();
+          });
+        } else {
+          setState(() {
+            _deliveryPrice = distance * _outsideSum;
+          });
+          BlocProvider.of<OrdersBloc>(context).add(
+            AddDeliveryPrice(
+              price: distance * _outsideSum,
+              servicePrice: _servicePrice,
+              city: false,
+              distance: distance.toInt().toString(),
+            ),
+          );
+        }
       } else {
         setState(() {
           _deliveryPrice = distance * _outsideSum;

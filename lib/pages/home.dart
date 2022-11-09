@@ -5,23 +5,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
-import 'package:scorohod_app/main.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/pages/choose_city.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/pages/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
-import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/home_menu.dart';
-import 'package:scorohod_app/widgets/order_widget.dart';
 import 'package:scorohod_app/services/app_data.dart' as appData;
 import 'package:scorohod_app/widgets/shop_cell.dart';
 
@@ -115,16 +111,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   void initState() {
+    Future.delayed(Duration(milliseconds: 500), () {
+      var provider = Provider.of<DataProvider>(context, listen: false);
+      var bloc = BlocProvider.of<OrdersBloc>(context);
+      _update(provider, bloc);
+    });
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() {
-    var provider = Provider.of<DataProvider>(context);
-    var bloc = BlocProvider.of<OrdersBloc>(context);
-    _update(provider, bloc);
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   var provider = Provider.of<DataProvider>(context);
+  //   var bloc = BlocProvider.of<OrdersBloc>(context);
+  //   _update(provider, bloc);
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -260,10 +261,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 onSelect: (address, latLng) {
                   debugPrint(address);
                   setState(() {
-                    provider.setUserLatLng(latLng);
-                    provider.setUserAddress(address);
-                    _search = false;
-                    provider.user.address = address;
+                    if (latLng.latitude != null) {
+                      provider.setUserLatLng(latLng);
+                      provider.setUserAddress(address);
+                      if (int.tryParse(address.substring(
+                                  address.length - 1, address.length)) !=
+                              null ||
+                          int.tryParse(address.substring(
+                                  address.length - 2, address.length - 1)) !=
+                              null) {
+                        _search = false;
+                      }
+                      provider.user.address = address;
+                    }
                   });
                 },
               ),

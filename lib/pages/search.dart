@@ -3,7 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
+import 'package:provider/provider.dart';
+import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
+import 'package:yandex_geocoder/yandex_geocoder.dart';
 
 import '../widgets/home_menu.dart';
 
@@ -22,24 +25,29 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  late final GooglePlace _googlePlace;
-  List<AutocompletePrediction> _predictions = [];
+  // late final GooglePlace _googlePlace;
+  final YandexGeocoder geocoder =
+      YandexGeocoder(apiKey: '844ff5f2-ed67-4950-bd7c-1544e3d9056f');
+  List<FeatureMember>? _predictions;
   final _searchController = TextEditingController();
 
   void _searchPlace() async {
     if (_searchController.text.isNotEmpty) {
-      var result = await _googlePlace.autocomplete.get(
-        _searchController.text,
-        language: "RU_ru",
+      var result = await geocoder.getGeocode(
+        GeocodeRequest(
+          geocode: AddressGeocode(address: _searchController.text),
+          lang: Lang.ru,
+          kind: KindRequest.house,
+        ),
       );
-      if (result != null && result.predictions != null && mounted) {
+      if (result != null && mounted) {
         setState(() {
-          _predictions = result.predictions!;
+          _predictions = result.response?.geoObjectCollection?.featureMember;
         });
       }
     } else {
       setState(() {
-        _predictions = [];
+        _predictions = null;
       });
     }
   }
@@ -47,7 +55,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    _googlePlace = GooglePlace(googleAPIKey);
+    // _googlePlace = GooglePlace(googleAPIKey);
     _searchController.addListener(_searchPlace);
   }
 
@@ -87,20 +95,29 @@ class _SearchPageState extends State<SearchPage> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 return ListTile(
-                    leading: const Icon(
-                      Icons.pin_drop,
-                      color: red,
+                    leading: Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: const Icon(
+                        Icons.place,
+                        color: red,
+                      ),
                     ),
                     title: Text(
-                      _predictions[index].description ?? "",
+                      _predictions?[index].geoObject?.name ?? "",
                       style: GoogleFonts.rubik(
                           fontWeight: FontWeight.w400, fontSize: 17),
                     ),
+                    subtitle: Text(
+                      _predictions?[index].geoObject?.description ?? "",
+                      maxLines: 2,
+                      style: GoogleFonts.rubik(
+                          fontWeight: FontWeight.w400, fontSize: 14),
+                    ),
                     onTap: () {
-                      getPrediction(_predictions[index]);
+                      getPrediction(_predictions?[index].geoObject);
                     });
               },
-              childCount: _predictions.length,
+              childCount: _predictions != null ? _predictions?.length : 0,
             ),
           ),
         ],
@@ -108,18 +125,19 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  void getPrediction(AutocompletePrediction? p) async {
+  void getPrediction(GeoObject? p) async {
     if (p != null) {
-      var detail = await _googlePlace.details.get(p.placeId!);
-
-      var placeId = p.placeId;
-      double lat = detail!.result!.geometry!.location!.lat!;
-      double lng = detail.result!.geometry!.location!.lng!;
-
       // var address = await Geocoder.local.findAddressesFromQuery(p.description);
-      widget.onSelect(p.description ?? '', LatLng(lat, lng));
-      print(lat);
-      print(lng);
+      _searchController.text = p.name!;
+      _searchController.selection = TextSelection(
+        baseOffset: _searchController.text.length,
+        extentOffset: _searchController.text.length,
+      );
+      print(p.metaDataProperty?.geocoderMetaData?.addressDetails?.country
+          ?.addressLine);
+      setState(() {});
+      widget.onSelect('${p.description}, ${p.name}',
+          LatLng(p.point!.latitude, p.point!.longitude));
     }
   }
 }
