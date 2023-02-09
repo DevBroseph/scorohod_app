@@ -29,7 +29,6 @@ class _OrderStatusPageState extends State<OrderStatusPage> {
   void getOrders() async {
     var userId = Provider.of<DataProvider>(context, listen: false).user.id;
     if (userId.isNotEmpty) {
-      print(userId);
       var result = await NetHandler(context).getOrders(userId);
       var shops = await NetHandler(context).getShops();
       if (result != null) {
@@ -96,8 +95,10 @@ class _OrderStatusPageState extends State<OrderStatusPage> {
                   delegate: SliverChildBuilderDelegate(
                       (context, index) => OrderElementStatusCard(
                             order: _orders[index],
-                            shop: _shops.firstWhere((element) =>
-                                element.shopId == _orders[index].shopId),
+                            shop: _shops.firstWhere(
+                              (element) =>
+                                  element.shopId == _orders[index].shopId,
+                            ),
                           ),
                       childCount: _orders.length),
                 ),

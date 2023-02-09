@@ -133,8 +133,6 @@ class _SearchPageState extends State<SearchPage> {
         baseOffset: _searchController.text.length,
         extentOffset: _searchController.text.length,
       );
-      print(p.metaDataProperty?.geocoderMetaData?.addressDetails?.country
-          ?.addressLine);
       setState(() {});
       widget.onSelect('${p.description}, ${p.name}',
           LatLng(p.point!.latitude, p.point!.longitude));

@@ -35,15 +35,16 @@ String getStatus(String status) {
 }
 
 int getIntStatus(String status) {
+  print(status);
   var newStatus = '';
   switch (status) {
     case 'new_order':
       return 1;
-    case 'order_collect':
+    case 'manager_accept':
       return 2;
-    case 'shop_ready':
+    case 'manager_done':
       return 3;
-    case 'courier_success':
+    case 'courier_accept':
       return 4;
     case 'order_done':
       return 5;

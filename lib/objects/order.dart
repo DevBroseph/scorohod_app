@@ -24,6 +24,7 @@ class Order {
     required this.userLatLng,
     required this.discount,
     required this.receiptId,
+    required this.courierId,
     required this.shopId,
   });
 
@@ -37,6 +38,7 @@ class Order {
   Coordinates userLatLng;
   String discount;
   String receiptId;
+  String? courierId;
   String shopId;
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -50,6 +52,7 @@ class Order {
         userLatLng: coordinatesFromJson(json['user_lat_lng']),
         discount: json["discount"],
         receiptId: json["receipt_id"],
+        courierId: json["courier_id"],
         shopId: json["shop_id"],
       );
 

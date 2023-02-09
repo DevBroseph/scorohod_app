@@ -379,7 +379,6 @@ class _State extends State<ProductInfoBottomDialog> {
                             //       .quantity += count != 0 ? count : 1;
                             // } else {
                             widget.callBack(count);
-                            print('Добавить');
                             BlocProvider.of<OrdersBloc>(context).add(
                               AddProduct(
                                   orderElement: OrderElement(

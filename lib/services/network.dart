@@ -9,14 +9,14 @@ import 'package:scorohod_app/objects/delivery.dart';
 import 'package:scorohod_app/objects/error.dart';
 import 'package:scorohod_app/objects/group.dart';
 import 'package:scorohod_app/objects/info.dart';
+import 'package:scorohod_app/objects/manager.dart';
 import 'package:scorohod_app/objects/order.dart';
 import 'package:scorohod_app/objects/order_element.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/objects/shop.dart';
+import 'package:scorohod_app/objects/sms.dart';
 import 'package:scorohod_app/objects/user.dart' as object;
-import 'package:scorohod_app/services/app_data.dart';
 import 'package:scorohod_app/services/constants.dart';
-import 'package:scorohod_app/services/extensions.dart';
 
 import '../objects/courier_info.dart';
 
@@ -73,12 +73,19 @@ class NetHandler {
     return null;
   }
 
+  Future<SmsAnswer?> sendMessage(String phone, int code) async {
+    var data = await get(
+      Uri.parse(
+          'https://sms.ru/sms/send?api_id=CA9C39BE-6DCD-EA63-48D3-52C56CDD54C4&to=$phone&msg=Проверочный код: $code&json=1'),
+    );
+    return data != null ? smsAnswerFromJson(data.body) : null;
+  }
+
   Future<List<Category>?> getCategories() async {
     var data = await _request(
       url: "categories",
       method: Method.get,
     );
-    // print(data);
     return data != null ? categoriesFromJson(data) : null;
   }
 
@@ -87,25 +94,21 @@ class NetHandler {
       url: "shops",
       method: Method.get,
     );
-    // print(data);
 
     return data != null ? shopsFromJson(data) : null;
   }
 
   Future<List<Shop>?> getCityShops(city) async {
-    print(city);
     var data = await _request(
       url: 'shops/$city',
       method: Method.get,
     );
-    print(data);
 
     return data != null ? shopsFromJson(data) : null;
   }
 
   Future<List<CityCoordinates>?> getCoordinates() async {
     var data = await _request(url: "coordinates", method: Method.get);
-    print(data);
 
     return data != null ? cityCoordinatesFromJson(data) : null;
   }
@@ -133,7 +136,6 @@ class NetHandler {
       url: "nomenclatures",
       method: Method.get,
     );
-    // print(data);
     return data != null ? productsFromJson(data) : null;
   }
 
@@ -142,7 +144,7 @@ class NetHandler {
       url: "nomenclatures/$shopId",
       method: Method.get,
     );
-    // print(data);
+
     return data != null ? productsFromJson(data) : null;
   }
 
@@ -175,7 +177,6 @@ class NetHandler {
       },
       method: Method.post,
     );
-    print(fcmToken);
     return data != null ? orderFromJson(data) : null;
   }
 
@@ -197,10 +198,19 @@ class NetHandler {
 
   Future<CourierInfo?> getCourierInfo(String id) async {
     var data = await _request(
-      url: "couriers/17",
+      url: "couriers/$id",
       method: Method.get,
     );
     return data != null ? courierInfoFromJson(data) : null;
+  }
+
+  Future<Manager?> getManagerInfo(String id) async {
+    var data = await _request(
+      url: "managers/$id",
+      method: Method.get,
+    );
+    print(data);
+    return data != null ? managerFromJson(data) : null;
   }
 
   Future<object.User?> auth(
@@ -261,12 +271,10 @@ class NetHandler {
   }
 
   Future<object.User?> getUser(String phone) async {
-    print(phone);
     var data = await _request(
       url: "auth/$phone",
       method: Method.get,
     );
-    print(data);
     try {
       return data != null ? object.userFromJson(data) : null;
     } catch (e) {
@@ -288,8 +296,6 @@ class NetHandler {
       url: "delivery",
       method: Method.get,
     );
-
-    print(data);
 
     return data != null ? deliveryInfoFromJson(data) : null;
   }

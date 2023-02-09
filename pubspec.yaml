@@ -67,6 +67,7 @@ dependencies:
   flutter_svg: ^1.0.3
   google_fonts: ^3.0.1
   yandex_geocoder: ^2.0.2
+  sliding_up_panel: ^2.0.0+1
 
 
 dev_dependencies:

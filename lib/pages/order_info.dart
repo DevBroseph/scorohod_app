@@ -9,6 +9,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:scorohod_app/objects/coordinates.dart';
 import 'package:scorohod_app/objects/courier_info.dart';
+import 'package:scorohod_app/objects/manager.dart';
 import 'package:scorohod_app/objects/order.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
@@ -20,7 +21,7 @@ import 'package:scorohod_app/widgets/order_element.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class OrderInfoPage extends StatefulWidget {
-  const OrderInfoPage({
+  OrderInfoPage({
     Key? key,
     required this.color,
     required this.order,
@@ -28,7 +29,7 @@ class OrderInfoPage extends StatefulWidget {
   }) : super(key: key);
 
   final Color color;
-  final Order order;
+  Order order;
   final Shop shop;
 
   @override
@@ -39,6 +40,8 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
   GoogleMapController? _mapController;
 
   Coordinates? _courierCoordinates;
+  Manager? _manager;
+  late Timer _timer;
 
   Marker? _courierMarker;
   Marker? _userMarker;
@@ -53,37 +56,10 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
 
   bool _mapInit = false;
 
-  void setMarks(DataProvider provider) async {
-    var userLatLng = LatLng(
-        widget.order.userLatLng.latitude, widget.order.userLatLng.longitude);
-    var shopLatLng = LatLng(
-        widget.shop.coordinates.latitude, widget.shop.coordinates.longitude);
-    setState(() {
-      _userMarker = Marker(
-        markerId: const MarkerId('userMarker'),
-        icon: _userIcon!,
-        position: userLatLng,
-      );
-      _shopMarker = Marker(
-        markerId: const MarkerId('shopMarker'),
-        icon: _shopIcon!,
-        position: shopLatLng,
-      );
-      if (_courierCoordinates != null) {
-        _courierMarker = Marker(
-          markerId: const MarkerId('courierMarker'),
-          icon: _courierIcon!,
-          position: LatLng(
-              _courierCoordinates!.latitude, _courierCoordinates!.longitude),
-        );
-      }
-    });
-    final directions = await DirectionsRepository(dio: null)
-        .getDirections(origin: userLatLng, destination: shopLatLng);
-    setState(() {
-      _info = directions;
-      _mapInit = true;
-    });
+  @override
+  void initState() {
+    _timer = Timer.periodic(const Duration(seconds: 15), (t) => _reloadPage());
+    super.initState();
   }
 
   @override
@@ -91,24 +67,70 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     if (_mapController != null) {
       _mapController!.dispose();
     }
+    _timer.cancel();
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
-    _getCourierLocation();
-    _getIcons();
-    _getCourierInfo();
+    _reloadPage();
+
     super.didChangeDependencies();
   }
 
+  void _reloadPage() {
+    _getCourierLocation();
+    _getIcons();
+    if (widget.order.courierId != null && widget.order.courierId != '') {
+      _getCourierInfo();
+    }
+    print(widget.order.receiptId);
+    if (widget.order.receiptId != null && widget.order.receiptId != '') {
+      _getManagerInfo();
+    }
+  }
+
+  void getOrders() async {
+    var userId = Provider.of<DataProvider>(context, listen: false).user.id;
+
+    var result = await NetHandler(context).getOrders(userId);
+  }
+
+  void _getCourierLocation() async {
+    var result =
+        await NetHandler(context).getCourierLocation(widget.order.orderId);
+    if (result != null) {
+      setState(() {
+        if (result.courierLocation != null) {
+          _courierCoordinates = result.courierLocation!.courierLocation;
+        }
+        widget.order = result.order;
+      });
+      print('its okey');
+    }
+    setMarks(Provider.of<DataProvider>(context, listen: false));
+  }
+
+  void _getManagerInfo() async {
+    var result = await NetHandler(context).getManagerInfo(
+      widget.order.receiptId,
+    );
+
+    if (result != null) {
+      setState(() {
+        _manager = result;
+      });
+    }
+  }
+
   void _getCourierInfo() async {
-    var result = await NetHandler(context).getCourierInfo('17');
+    var result = await NetHandler(context).getCourierInfo(
+      widget.order.courierId!,
+    );
     if (result != null) {
       setState(() {
         _courierInfo = result;
       });
-      print(result.courierPhone);
     }
   }
 
@@ -140,15 +162,45 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
     });
   }
 
-  void _getCourierLocation() async {
-    var result =
-        await NetHandler(context).getCourierLocation(widget.order.orderId);
-    if (result != null && result.courierLocation != null) {
-      setState(() {
-        _courierCoordinates = result.courierLocation!.courierLocation;
-      });
-    }
-    setMarks(Provider.of<DataProvider>(context, listen: false));
+  void setMarks(DataProvider provider) async {
+    var userLatLng = LatLng(
+      widget.order.userLatLng.latitude,
+      widget.order.userLatLng.longitude,
+    );
+    var shopLatLng = LatLng(
+      widget.shop.coordinates.latitude,
+      widget.shop.coordinates.longitude,
+    );
+    setState(() {
+      _userMarker = Marker(
+        markerId: const MarkerId('userMarker'),
+        icon: _userIcon!,
+        position: userLatLng,
+      );
+      _shopMarker = Marker(
+        markerId: const MarkerId('shopMarker'),
+        icon: _shopIcon!,
+        position: shopLatLng,
+      );
+      if (_courierCoordinates != null) {
+        _courierMarker = Marker(
+          markerId: const MarkerId('courierMarker'),
+          icon: _courierIcon!,
+          position: LatLng(
+            _courierCoordinates!.latitude,
+            _courierCoordinates!.longitude,
+          ),
+        );
+      }
+    });
+    final directions = await DirectionsRepository(dio: null).getDirections(
+      origin: userLatLng,
+      destination: shopLatLng,
+    );
+    setState(() {
+      _info = directions;
+      _mapInit = true;
+    });
   }
 
   @override
@@ -160,12 +212,11 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
         _shopIcon != null &&
         _userIcon != null) {
       setMarks(provider);
-      // print(widget.order.userLatLng);
     }
     return Scaffold(
       body: Stack(
         children: [
-          if (_info != null && _courierInfo != null)
+          if (_info != null)
             CustomScrollView(slivers: [
               SliverAppBar(
                 pinned: true,
@@ -187,7 +238,9 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                   child: Text(
                     getStatus(widget.order.status),
                     style: GoogleFonts.rubik(
-                        fontSize: 20, fontWeight: FontWeight.w500),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
@@ -198,18 +251,25 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                   child: ClipRRect(
                     borderRadius: radius,
                     child: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: radius, boxShadow: shadow),
-                      child: LinearProgressBar(
-                        maxSteps: 5,
-                        progressType: LinearProgressBar.progressTypeLinear,
-                        currentStep: getIntStatus(widget.order.status),
-                        minHeight: 8,
-                        progressColor: red,
-                        dotsSpacing: EdgeInsets.all(20),
-                        backgroundColor: Colors.grey[200],
-                      ),
-                    ),
+                        decoration: const BoxDecoration(
+                          borderRadius: radius,
+                          // border: Border.all(
+                          //   width: 0.3,
+                          //   color: Colors.grey.withOpacity(0.3),
+                          // ),
+                        ),
+                        child: Stack(
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              height: 10,
+                              color: red,
+                              width: (MediaQuery.of(context).size.width - 30) /
+                                  5 *
+                                  getIntStatus(widget.order.status),
+                            )
+                          ],
+                        )),
                   ),
                 ),
               ),
@@ -311,10 +371,16 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                     widget.order.address,
                   ),
                   _bottomCard(
+                    'Номер менеджера',
+                    _manager == null ? 'Номер не указан' : _manager!.phone,
+                  ),
+                  _bottomCard(
                     'Номер курьера',
-                    _courierInfo!.courierPhone == ''
+                    _courierInfo == null
                         ? 'Номер не указан'
-                        : _courierInfo!.courierPhone,
+                        : _courierInfo!.courierPhone == ''
+                            ? 'Номер не указан'
+                            : _courierInfo!.courierPhone,
                   ),
                 ]),
               ),
@@ -322,7 +388,7 @@ class _OrderInfoPageState extends State<OrderInfoPage> {
                 child: SizedBox(height: 50),
               ),
             ]),
-          if (_info == null || _courierInfo == null)
+          if (_info == null)
             SizedBox(
               height: MediaQuery.of(context).size.height,
               child: Align(

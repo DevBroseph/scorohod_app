@@ -16,6 +16,9 @@ import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
 import 'package:scorohod_app/widgets/custom_text_field.dart';
 import 'package:scorohod_app/widgets/my_flushbar.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
+
+import '../widgets/address_modal.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({
@@ -34,6 +37,8 @@ class _AccountPageState extends State<AccountPage>
   final _roomController = TextEditingController();
   final _entranceController = TextEditingController();
   final _floorController = TextEditingController();
+
+  PanelController panelController = PanelController();
 
   firebase.FirebaseAuth auth = firebase.FirebaseAuth.instance;
 
@@ -69,9 +74,9 @@ class _AccountPageState extends State<AccountPage>
         } else {
           _phoneController.text = '';
         }
-        _roomController.text = '';
-        _entranceController.text = '';
-        _floorController.text = '';
+        _roomController.text = provider.user.room;
+        _entranceController.text = provider.user.entrance;
+        _floorController.text = provider.user.floor;
         _loadData = true;
       });
     }
@@ -129,7 +134,6 @@ class _AccountPageState extends State<AccountPage>
       MyFlushbar.showFlushbar(context, 'Ошибка.', 'Укажите адрес доставки.');
       return;
     }
-    print(provider.hasUser);
     if (provider.user.id == '') {
       var result = await NetHandler(context).auth(
         _nameController.text,
@@ -192,18 +196,6 @@ class _AccountPageState extends State<AccountPage>
         MyFlushbar.showFlushbar(context, 'Ошибка.', 'Данные не сохранены.');
       }
     }
-  }
-
-  @override
-  void initState() {
-    print('init');
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    print('dispose');
-    super.dispose();
   }
 
   @override
@@ -299,64 +291,51 @@ class _AccountPageState extends State<AccountPage>
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(15, 25, 15, 0),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _search = true;
-                      });
-                    },
-                    child: TextFieldCustom(
-                        controller: _addressController,
-                        title: 'Адрес доставки',
-                        keyboardType: TextInputType.text,
-                        needPhoneMask: false,
-                        needCodeMask: false,
-                        enabled: false),
-                  ),
+                  child: _addressListTile(provider.user.address),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      bottom: 16.0, left: 15, right: 15, top: 40),
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: TextFieldCustom(
-                          controller: _roomController,
-                          needCodeMask: false,
-                          keyboardType: TextInputType.text,
-                          title: "Кв. / Офис",
-                          needPhoneMask: false,
-                          enabled: true,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Flexible(
-                        child: TextFieldCustom(
-                          controller: _entranceController,
-                          needCodeMask: false,
-                          keyboardType: TextInputType.text,
-                          title: "Подъезд",
-                          needPhoneMask: false,
-                          enabled: true,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Flexible(
-                        child: TextFieldCustom(
-                          controller: _floorController,
-                          needCodeMask: false,
-                          keyboardType: TextInputType.text,
-                          title: "Этаж",
-                          needPhoneMask: false,
-                          enabled: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(
+              //         bottom: 16.0, left: 15, right: 15, top: 40),
+              //     child: Row(
+              //       children: [
+              //         Flexible(
+              //           child: TextFieldCustom(
+              //             controller: _roomController,
+              //             needCodeMask: false,
+              //             keyboardType: TextInputType.text,
+              //             title: "Кв. / Офис",
+              //             needPhoneMask: false,
+              //             enabled: true,
+              //           ),
+              //         ),
+              //         const SizedBox(width: 20),
+              //         Flexible(
+              //           child: TextFieldCustom(
+              //             controller: _entranceController,
+              //             needCodeMask: false,
+              //             keyboardType: TextInputType.text,
+              //             title: "Подъезд",
+              //             needPhoneMask: false,
+              //             enabled: true,
+              //           ),
+              //         ),
+              //         const SizedBox(width: 20),
+              //         Flexible(
+              //           child: TextFieldCustom(
+              //             controller: _floorController,
+              //             needCodeMask: false,
+              //             keyboardType: TextInputType.text,
+              //             title: "Этаж",
+              //             needPhoneMask: false,
+              //             enabled: true,
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
               SliverToBoxAdapter(
                 child: ScaleButton(
                   onTap: () => putUserData(provider),
@@ -391,6 +370,19 @@ class _AccountPageState extends State<AccountPage>
               )
             ],
           ),
+          SlidingUpPanel(
+            controller: panelController,
+            renderPanelSheet: false,
+            isDraggable: true,
+            collapsed: Container(),
+            panel: const AddressModal(),
+            onPanelClosed: () {},
+            onPanelOpened: () {},
+            onPanelSlide: (size) {},
+            maxHeight: 700,
+            minHeight: 0,
+            defaultPanelState: PanelState.CLOSED,
+          ),
           if (_search)
             SearchPage(
               close: () {
@@ -399,7 +391,6 @@ class _AccountPageState extends State<AccountPage>
                 });
               },
               onSelect: (address, latLng) {
-                debugPrint(address);
                 setState(() {
                   _latLng = latLng;
                   _search = false;
@@ -413,6 +404,68 @@ class _AccountPageState extends State<AccountPage>
               },
             ),
         ],
+      ),
+    );
+  }
+
+  ScaleButton _addressListTile(String address) {
+    setUserData(Provider.of<DataProvider>(context));
+    return ScaleButton(
+      duration: const Duration(milliseconds: 200),
+      bound: 0.05,
+      onTap: () => panelController.open(),
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: shadow
+            // border: Border.all(
+            //   width: 1,
+            //   color: Colors.grey[300]!,
+            // ),
+            ),
+        child: ListTile(
+          leading: SizedBox(
+            width: 40,
+            child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                height: 25,
+                width: 25,
+                decoration: BoxDecoration(
+                  color: address != '' ? Colors.green[200] : Colors.red[200],
+                  shape: BoxShape.circle,
+                ),
+                child: address != ''
+                    ? const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 18,
+                      )
+                    : const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+              ),
+            ),
+          ),
+          title: Text(
+            address != '' ? address : 'Адрес не выбран',
+            style: GoogleFonts.rubik(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: address != '' ? Colors.black : Colors.grey[500],
+            ),
+          ),
+          // trailing: GestureDetector(
+          //   onTap: () {},
+          //   child: Icon(
+          //     Icons.mode_edit_rounded,
+          //     color: Colors.grey[300],
+          //   ),
+          // ),
+        ),
       ),
     );
   }

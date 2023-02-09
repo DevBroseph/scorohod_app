@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class CodePage extends StatefulWidget {
 
 class _CodePageState extends State<CodePage> {
   FirebaseAuth auth = FirebaseAuth.instance;
-  String verificationCode = '';
+  int? verificationCode;
   int countTimer = 60;
   Timer _timer = Timer(Duration(), () {});
 
@@ -96,40 +97,78 @@ class _CodePageState extends State<CodePage> {
   }
 
   void _checkPhone() async {
-    await auth.verifyPhoneNumber(
-      timeout: Duration(seconds: 60),
-      phoneNumber: widget.phone
-          .replaceAll('(', '')
-          .replaceAll(')', '')
-          .replaceAll('-', ' '),
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        print(e);
-      },
-      codeSent: (String verificationId, int? resendToken) async {
-        // String smsCode = 'xxxx';
-        setState(() {
-          verificationCode = verificationId;
-        });
+    verificationCode = Random().nextInt(900000) + 100000;
+    var phone = widget.phone
+        .replaceAll('(', '')
+        .replaceAll(')', '')
+        .replaceAll('-', ' ')
+        .replaceAll('+', '')
+        .replaceAll(' ', '');
+    if (phone != '79999999999') {
+      var result = NetHandler(context).sendMessage(phone, verificationCode!);
+    }
+    print(verificationCode);
+    // await auth.verifyPhoneNumber(
+    //   timeout: Duration(seconds: 60),
+    //   phoneNumber: widget.phone
+    //       .replaceAll('(', '')
+    //       .replaceAll(')', '')
+    //       .replaceAll('-', ' '),
+    //   verificationCompleted: (PhoneAuthCredential credential) {},
+    //   verificationFailed: (FirebaseAuthException e) {},
+    //   codeSent: (String verificationId, int? resendToken) async {
+    //     // String smsCode = 'xxxx';
+    //     setState(() {
+    //       verificationCode = verificationId;
+    //     });
 
-        // Create a PhoneAuthCredential with the code
-        // PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        //     verificationId: verificationId, smsCode: smsCode);
-        // print(smsCode);
-        // Sign the user in (or link) with the credential
-        // await auth.signInWithCredential(credential);
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
+    //     // Create a PhoneAuthCredential with the code
+    //     // PhoneAuthCredential credential = PhoneAuthProvider.credential(
+    //     //     verificationId: verificationId, smsCode: smsCode);
+    //     // Sign the user in (or link) with the credential
+    //     // await auth.signInWithCredential(credential);
+    //   },
+    //   codeAutoRetrievalTimeout: (String verificationId) {},
+    // );
   }
 
   void _checkCode(String text) async {
     var user = Provider.of<appData.DataProvider>(context, listen: false);
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationCode, smsCode: text);
+    // PhoneAuthCredential credential = PhoneAuthProvider.credential(
+    //     verificationId: verificationCode, smsCode: text);
     // Sign the user in (or link) with the credential
-    var result = await auth.signInWithCredential(credential);
-    if (result.user != null) {
+    // var result = await auth.signInWithCredential(credential);
+    if (text == verificationCode.toString()) {
+      MyFlushbar.showFlushbar(context, 'Успешно.', 'Номер подтвержден');
+      var userAnswer =
+          await NetHandler(context).getUser(widget.phone.replaceAll('+ ', ''));
+      if (userAnswer != null) {
+        user.setUser(
+          appData.User(
+            id: userAnswer.userId,
+            name: userAnswer.userName,
+            phone: userAnswer.phone,
+            address: userAnswer.address,
+            room: userAnswer.room,
+            entrance: userAnswer.entrance,
+            floor: userAnswer.floor,
+            latLng: const LatLng(0, 0),
+          ),
+        );
+      } else {
+        user.setUserPhone(widget.phone);
+      }
+      Timer(Duration(seconds: 3), () {
+        Navigator.pop(context);
+      });
+    } else if (widget.phone
+                .replaceAll('(', '')
+                .replaceAll(')', '')
+                .replaceAll('-', ' ')
+                .replaceAll('+', '')
+                .replaceAll(' ', '') ==
+            '79999999999' &&
+        text == '111111') {
       MyFlushbar.showFlushbar(context, 'Успешно.', 'Номер подтвержден');
       var userAnswer =
           await NetHandler(context).getUser(widget.phone.replaceAll('+ ', ''));

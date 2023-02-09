@@ -182,7 +182,6 @@ class _ChooseCityState extends State<ChooseCity> {
     } else {
       isEmptyCity = false;
     }
-    print(resultENG[index]);
     city.city.nameRU = result[index]!;
     city.city.nameENG = resultENG[index]!;
     city.changeCity(city.city);

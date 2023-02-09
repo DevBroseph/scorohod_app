@@ -72,7 +72,7 @@ class OrderElementCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(right: 15, bottom: 15),
               child: Text(
-                '${orderElement.quantity} шт, ${orderElement.price} ₽',
+                '${orderElement.quantity} шт, ${orderElement.basePrice} ₽',
                 style: GoogleFonts.rubik(fontWeight: FontWeight.w400),
               ),
             ),

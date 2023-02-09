@@ -1,21 +1,16 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders.dart';
-import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/objects/order_element.dart';
 import 'package:scorohod_app/objects/product.dart';
 import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/widgets/bottom_dialog_product_info.dart';
 
-import '../bloc/orders_bloc/orders_event.dart';
 import 'button.dart';
 
 class ProductCard extends StatefulWidget {
@@ -55,7 +50,6 @@ class _ProductCardState extends State<ProductCard> {
   bool getId(OrdersBloc bloc, int id) {
     for (int i = 0; i < bloc.products.length; i++) {
       if (bloc.products[i].id == id && bloc.products[i].quantity > 0) {
-        print('id is: ' + (bloc.products[0].toJson()).toString());
         return true;
       }
     }
@@ -65,9 +59,7 @@ class _ProductCardState extends State<ProductCard> {
   int getQuantity(OrdersBloc bloc, int id) {
     for (int i = 0; i < bloc.products.length; i++) {
       if (bloc.products[i].id == id) {
-        print(bloc.products[i].quantity.toString() + ' функция');
         return bloc.products[i].quantity;
-        break;
       }
     }
     return 0;
@@ -182,7 +174,6 @@ class _ProductCardState extends State<ProductCard> {
                           if (getQuantity(
                                   bloc, int.parse(widget.item.nomenclatureId)) >
                               0) {
-                            print(quantity);
                             bloc.add(
                               AddProduct(
                                 orderElement: OrderElement(

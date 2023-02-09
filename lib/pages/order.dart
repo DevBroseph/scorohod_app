@@ -8,17 +8,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
+import 'package:scorohod_app/objects/address.dart';
 import 'package:scorohod_app/pages/order_info.dart';
 import 'package:scorohod_app/pages/phone.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/services/app_data.dart' as appData;
+import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
+import 'package:scorohod_app/widgets/address_modal.dart';
 import 'package:scorohod_app/widgets/custom_text_field.dart';
 import 'package:scorohod_app/widgets/deliver_widget.dart';
 import 'package:scorohod_app/widgets/my_flushbar.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
+
+import '../services/app_data.dart';
 
 class OrderPage extends StatefulWidget {
   final Color color;
@@ -37,6 +44,8 @@ class _OrderPageState extends State<OrderPage> {
   final _roomController = TextEditingController();
   final _entranceController = TextEditingController();
   final _floorController = TextEditingController();
+
+  PanelController panelController = PanelController();
 
   bool visibleButton = true;
 
@@ -82,9 +91,9 @@ class _OrderPageState extends State<OrderPage> {
         } else {
           _phoneController.text = '';
         }
-        _roomController.text = '';
-        _entranceController.text = '';
-        _floorController.text = '';
+        _roomController.text = provider.user.room;
+        _entranceController.text = provider.user.entrance;
+        _floorController.text = provider.user.floor;
         _loadData = true;
       });
     }
@@ -165,13 +174,12 @@ class _OrderPageState extends State<OrderPage> {
     setState(() {
       visibleButton = false;
     });
+    print(ordersBloc.deliveryPrice);
     var fcmToken = await FirebaseMessaging.instance.getToken();
     var answer = await NetHandler(context).createOrder(
       ordersBloc.products,
       provider.user.id,
-      ordersBloc.totalPrice +
-          ordersBloc.deliveryPrice +
-          ordersBloc.servicePrice,
+      ordersBloc.totalPrice + ordersBloc.deliveryPrice,
       provider.user.address,
       provider.user.latLng,
       0.0,
@@ -235,22 +243,7 @@ class _OrderPageState extends State<OrderPage> {
                 child: Padding(
                   padding: const EdgeInsets.only(
                       bottom: 16.0, left: 15, right: 15, top: 20),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _search = true;
-                      });
-                    },
-                    child: TextFieldCustom(
-                      controller: _addressController,
-                      keyboardType: TextInputType.text,
-                      needCodeMask: false,
-                      title: "Адрес доставки",
-                      needPhoneMask: false,
-                      enabled: false,
-                      isRequired: true,
-                    ),
-                  ),
+                  child: _addressListTile(provider.user.address),
                 ),
               ),
               SliverToBoxAdapter(
@@ -370,7 +363,82 @@ class _OrderPageState extends State<OrderPage> {
             ),
             alignment: Alignment.bottomCenter,
           ),
+          SlidingUpPanel(
+            controller: panelController,
+            renderPanelSheet: false,
+            isDraggable: true,
+            collapsed: Container(),
+            panel: const AddressModal(),
+            onPanelClosed: () {},
+            onPanelOpened: () {},
+            onPanelSlide: (size) {},
+            maxHeight: 700,
+            minHeight: 0,
+            defaultPanelState: PanelState.CLOSED,
+          ),
         ],
+      ),
+    );
+  }
+
+  ScaleButton _addressListTile(String address) {
+    setUserData(Provider.of<DataProvider>(context));
+    return ScaleButton(
+      duration: const Duration(milliseconds: 200),
+      bound: 0.05,
+      onTap: () => panelController.open(),
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: shadow
+            // border: Border.all(
+            //   width: 1,
+            //   color: Colors.grey[300]!,
+            // ),
+            ),
+        child: ListTile(
+          leading: SizedBox(
+            width: 40,
+            child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                height: 25,
+                width: 25,
+                decoration: BoxDecoration(
+                  color: address != '' ? Colors.green[200] : Colors.red[200],
+                  shape: BoxShape.circle,
+                ),
+                child: address != ''
+                    ? const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 18,
+                      )
+                    : const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+              ),
+            ),
+          ),
+          title: Text(
+            address != '' ? address : 'Адрес не выбран',
+            style: GoogleFonts.rubik(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: address != '' ? Colors.black : Colors.grey[500],
+            ),
+          ),
+          // trailing: GestureDetector(
+          //   onTap: () {},
+          //   child: Icon(
+          //     Icons.mode_edit_rounded,
+          //     color: Colors.grey[300],
+          //   ),
+          // ),
+        ),
       ),
     );
   }

@@ -4,6 +4,8 @@ import 'package:scorohod_app/objects/coordinates.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../objects/address.dart';
+
 class User {
   String id;
   String name;
@@ -51,12 +53,24 @@ class AppData {
   final String _userCityRU = "userCityRU";
   final String _userCityENG = "userCityENG";
 
+  final String _addresses = "userAddresses";
+
   final String _userLatitude = "userLatitude";
   final String _userLongitude = "userLongitude";
 
   static Future<AppData> getInstance() async {
     var shared = await SharedPreferences.getInstance();
     return AppData(shared);
+  }
+
+  List<UserAddress> getAddresses() {
+    return _preferences.getString(_addresses) != null
+        ? addressesFromJson((_preferences.getString(_addresses)!))
+        : [];
+  }
+
+  void setAddresses(List<UserAddress> value) {
+    _preferences.setString(_addresses, addressesToJson(value));
   }
 
   String getUserId() {
@@ -122,6 +136,7 @@ class AppData {
   void setCityRu(String value) {
     _preferences.setString(_userCityRU, value);
   }
+
   String getCityENG() {
     return _preferences.getString(_userCityENG) ?? "";
   }
@@ -327,11 +342,12 @@ class ShopData {
 }
 
 class DataProvider extends ChangeNotifier {
-  DataProvider(this._user, this._currentShop, this._city);
+  DataProvider(this._user, this._currentShop, this._city, this.addresses);
 
   User _user;
   User get user => _user;
   bool get hasUser => _user.name != '' ? true : false;
+  List<UserAddress> addresses;
 
   Shop _currentShop;
   Shop get currentShop => _currentShop;
@@ -373,11 +389,16 @@ class DataProvider extends ChangeNotifier {
         city: shopPrefs.getCity(),
         cityCoordinates: Coordinates(latitude: 0, longitude: 0),
       ),
-      City(
-        nameRU: cityPrefs.getCityRu(),
-        nameENG: cityPrefs.getCityENG()
-      )
+      City(nameRU: cityPrefs.getCityRu(), nameENG: cityPrefs.getCityENG()),
+      userPrefs.getAddresses(),
     );
+  }
+
+  void updateAddresses(List<UserAddress> newAddresses) {
+    addresses = newAddresses;
+    print('10000000000000000');
+    notifyListeners();
+    AppData.getInstance().then((value) => value.setAddresses(newAddresses));
   }
 
   void setUser(User user) {

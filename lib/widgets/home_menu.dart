@@ -211,7 +211,6 @@ class HomeMenuState extends State<HomeMenu> {
 }
 /*
 var answer = await NetHandler(context).getCoordinates();
-                  print(answer);
                   if (answer != null) {
                     for (int i = answer.length-1; i>0; i--){
                       var answersCity = await geo.getGeocode(GeocodeRequest(

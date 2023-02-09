@@ -1,25 +1,33 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_platform_alert/flutter_platform_alert.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_place/google_place.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:scale_button/scale_button.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_bloc.dart';
 import 'package:scorohod_app/bloc/orders_bloc/orders_event.dart';
+import 'package:scorohod_app/objects/address.dart';
 import 'package:scorohod_app/objects/category.dart';
 import 'package:scorohod_app/objects/shop.dart';
 import 'package:scorohod_app/pages/choose_city.dart';
 import 'package:scorohod_app/pages/search.dart';
 import 'package:scorohod_app/pages/shop.dart';
 import 'package:scorohod_app/services/app_data.dart';
+import 'package:scorohod_app/services/constants.dart';
 import 'package:scorohod_app/services/extensions.dart';
 import 'package:scorohod_app/services/network.dart';
+import 'package:scorohod_app/widgets/address_modal.dart';
+import 'package:scorohod_app/widgets/custom_text_field.dart';
 import 'package:scorohod_app/widgets/home_menu.dart';
 import 'package:scorohod_app/services/app_data.dart' as appData;
 import 'package:scorohod_app/widgets/shop_cell.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -33,6 +41,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   var _search = false;
 
   TabController? tabController;
+  PanelController panelController = PanelController();
+
   final List<ShopCell> _list = [];
   List<Shop> _shops = [];
   List<Category> _categories = [];
@@ -172,9 +182,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
                     title: GestureDetector(
                       onTap: () {
-                        setState(() {
-                          _search = true;
-                        });
+                        // setState(() {
+                        //   _search = true;
+                        // });
+                        panelController.open();
                       },
                       child: SizedBox(
                         width: double.infinity,
@@ -259,24 +270,36 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   });
                 },
                 onSelect: (address, latLng) {
-                  debugPrint(address);
                   setState(() {
                     if (latLng.latitude != null) {
                       provider.setUserLatLng(latLng);
                       provider.setUserAddress(address);
-                      if (int.tryParse(address.substring(
-                                  address.length - 1, address.length)) !=
-                              null ||
-                          int.tryParse(address.substring(
-                                  address.length - 2, address.length - 1)) !=
-                              null) {
-                        _search = false;
-                      }
+                      // if (int.tryParse(address.substring(
+                      //             address.length - 1, address.length)) !=
+                      //         null ||
+                      //     int.tryParse(address.substring(
+                      //             address.length - 2, address.length - 1)) !=
+                      //         null) {
+                      _search = false;
+                      // }
                       provider.user.address = address;
                     }
                   });
                 },
               ),
+            SlidingUpPanel(
+              controller: panelController,
+              renderPanelSheet: false,
+              isDraggable: true,
+              collapsed: Container(),
+              panel: const AddressModal(),
+              onPanelClosed: () {},
+              onPanelOpened: () {},
+              onPanelSlide: (size) {},
+              maxHeight: 700,
+              minHeight: 0,
+              defaultPanelState: PanelState.CLOSED,
+            ),
             if (_categories.isEmpty)
               SizedBox(
                 height: MediaQuery.of(context).size.height,

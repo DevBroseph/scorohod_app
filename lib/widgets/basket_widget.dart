@@ -38,9 +38,8 @@ class _State extends State<BasketWidget> {
           var sum = BlocProvider.of<OrdersBloc>(context);
           double deliveryPrice =
               BlocProvider.of<OrdersBloc>(context).deliveryPrice;
-          print(deliveryPrice);
 
-          return Container(
+          return SizedBox(
             width: double.infinity,
             height: 100 + MediaQuery.of(context).padding.bottom,
             child: Column(
@@ -83,7 +82,7 @@ class _State extends State<BasketWidget> {
                           ),
                         ),
                         Text(
-                          "${(sum.totalPrice + sum.deliveryPrice).toStringAsFixed(2)} ₽",
+                          "${(sum.totalPrice + deliveryPrice).toStringAsFixed(2)} ₽",
                           style: GoogleFonts.rubik(
                             fontSize: 14,
                             color: Colors.white,
